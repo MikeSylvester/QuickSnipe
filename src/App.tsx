@@ -39,6 +39,7 @@ function App() {
     techBenchLocationId: 0,
     storageLocationId: 0,
     returnBinLocationId: 0,
+    preferredCamera: '',
     labelSettings: {
       widthMM: 40,
       heightMM: 30,
@@ -94,6 +95,7 @@ function App() {
           techBenchLocationId: electronConfig.techBenchLocationId || 0,
           storageLocationId: electronConfig.storageLocationId || 0,
           returnBinLocationId: electronConfig.returnBinLocationId || 0,
+          preferredCamera: electronConfig.preferredCamera || '',
           labelSettings: electronConfig.labelSettings ? {
             widthMM: electronConfig.labelSettings.widthMM ?? 40,
             heightMM: electronConfig.labelSettings.heightMM ?? 30,
@@ -133,6 +135,7 @@ function App() {
           techBenchLocationId: Number(localStorage.getItem('snipe_tech_bench_location_id')) || 0,
           storageLocationId: Number(localStorage.getItem('snipe_storage_location_id')) || 0,
           returnBinLocationId: Number(localStorage.getItem('snipe_return_bin_location_id')) || 0,
+          preferredCamera: localStorage.getItem('snipe_preferred_camera') || '',
           labelSettings: (() => {
             try {
               const stored = localStorage.getItem('snipe_label_settings');
@@ -179,6 +182,7 @@ function App() {
     techBenchLocationId: number;
     storageLocationId: number;
     returnBinLocationId: number;
+    preferredCamera: string;
     labelSettings: {
       widthMM: number;
       heightMM: number;
@@ -209,6 +213,7 @@ function App() {
       localStorage.setItem('snipe_tech_bench_location_id', String(newConfig.techBenchLocationId));
       localStorage.setItem('snipe_storage_location_id', String(newConfig.storageLocationId));
       localStorage.setItem('snipe_return_bin_location_id', String(newConfig.returnBinLocationId));
+      localStorage.setItem('snipe_preferred_camera', newConfig.preferredCamera);
       localStorage.setItem('snipe_label_settings', JSON.stringify(newConfig.labelSettings));
     }
     
@@ -257,6 +262,8 @@ function App() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [kioskMode]);
+
+
 
   const renderCurrentMode = () => {
     if (!isConfigured && currentMode !== 'menu' && currentMode !== 'config') {

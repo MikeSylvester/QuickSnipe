@@ -541,6 +541,7 @@ export const StoreroomSorter: React.FC<StoreroomSorterProps> = ({ onBack, config
         <CameraScanner
           onQrDetected={handleQrDetected}
           isScanning={true}
+          preferredCamera={config.preferredCamera}
         />
         {loading && (
           <div className="mt-4 text-center">

@@ -5,6 +5,7 @@ import { Camera, Square, ChevronDown } from 'lucide-react';
 interface CameraScannerProps {
   onQrDetected: (url: string) => void;
   isScanning: boolean;
+  preferredCamera?: string;
 }
 
 interface CameraDevice {
@@ -12,12 +13,13 @@ interface CameraDevice {
   label: string;
 }
 
-export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isScanning }) => {
+export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isScanning, preferredCamera }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const qrScannerRef = useRef<QrScanner | null>(null);
   const [cameras, setCameras] = useState<CameraDevice[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isSwitchingCamera, setIsSwitchingCamera] = useState(false);
   const [error, setError] = useState<string>('');
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
@@ -47,13 +49,34 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
       }));
       setCameras(cameraDevices);
       
-      // Select the first camera by default, preferring back camera if available
+      // Select camera based on preferred camera setting or fallback to back camera
       if (cameraDevices.length > 0 && !selectedCamera) {
-        const backCamera = cameraDevices.find(cam => 
-          cam.label.toLowerCase().includes('back') || 
-          cam.label.toLowerCase().includes('environment')
-        );
-        setSelectedCamera(backCamera?.id || cameraDevices[0].id);
+        let targetCamera = null;
+        
+        // First try to find the preferred camera
+        if (preferredCamera) {
+          targetCamera = cameraDevices.find(cam => 
+            cam.label.toLowerCase().includes(preferredCamera.toLowerCase())
+          );
+          console.log('Looking for preferred camera:', preferredCamera, 'Found:', targetCamera?.label);
+        }
+        
+        // If preferred camera not found, try back camera
+        if (!targetCamera) {
+          targetCamera = cameraDevices.find(cam => 
+            cam.label.toLowerCase().includes('back') || 
+            cam.label.toLowerCase().includes('environment')
+          );
+          console.log('Preferred camera not found, using back camera:', targetCamera?.label);
+        }
+        
+        // Fallback to first camera
+        if (!targetCamera) {
+          targetCamera = cameraDevices[0];
+          console.log('Using first available camera:', targetCamera?.label);
+        }
+        
+        setSelectedCamera(targetCamera.id);
       }
       
       return cameraDevices.length > 0;
@@ -74,19 +97,64 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
 
       setError('');
 
-      // Clean up existing scanner
+      // Enhanced cleanup of existing scanner
       if (qrScannerRef.current) {
         try {
+          console.log('Stopping existing QR scanner...');
           qrScannerRef.current.stop();
           qrScannerRef.current.destroy();
+          console.log('Existing QR scanner destroyed');
         } catch (e) {
           console.warn('Error cleaning up previous scanner:', e);
         }
         qrScannerRef.current = null;
       }
 
+      // Additional cleanup: stop any existing video tracks and wait for them to stop
+      if (videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        const tracks = stream.getTracks();
+        
+        console.log('Stopping video tracks in initializeScanner:', tracks.length);
+        tracks.forEach(track => {
+          console.log('Stopping video track:', track.label);
+          track.stop();
+        });
+        
+        // Wait for tracks to actually stop
+        await new Promise<void>((resolve) => {
+          const checkTracks = () => {
+            const activeTracks = tracks.filter(track => track.readyState === 'live');
+            if (activeTracks.length === 0) {
+              console.log('All video tracks stopped in initializeScanner');
+              resolve();
+            } else {
+              console.log('Waiting for tracks to stop in initializeScanner, active:', activeTracks.length);
+              setTimeout(checkTracks, 50);
+            }
+          };
+          checkTracks();
+        });
+        
+        videoRef.current.srcObject = null;
+      }
+
+      // Ensure video element is in a clean state
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
+
+      // Small delay to ensure cleanup is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const targetCameraId = cameraId || selectedCamera;
       console.log('Initializing scanner with camera:', targetCameraId);
+
+      // Ensure video element is ready
+      if (!videoRef.current) {
+        throw new Error('Video element not available after cleanup');
+      }
 
       // Create new scanner
       qrScannerRef.current = new QrScanner(
@@ -114,6 +182,14 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
       );
 
       console.log('Starting QR scanner...');
+      
+      // Ensure video element is ready before starting
+      if (videoRef.current) {
+        videoRef.current.pause();
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      
+      // Start the scanner
       await qrScannerRef.current.start();
       console.log('QR scanner started successfully');
       
@@ -152,31 +228,115 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
       console.log('Cleaning up camera scanner...');
       if (qrScannerRef.current) {
         try {
+          console.log('Stopping QR scanner during cleanup...');
           qrScannerRef.current.stop();
           qrScannerRef.current.destroy();
+          console.log('QR scanner destroyed during cleanup');
         } catch (e) {
           console.warn('Error during cleanup:', e);
         }
+        qrScannerRef.current = null;
+      }
+      
+      // Additional cleanup: stop any video tracks
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => {
+          console.log('Stopping video track during cleanup:', track.label);
+          track.stop();
+        });
+        videoRef.current.srcObject = null;
       }
     };
   }, []);
 
   // Initialize scanner when video element is ready
   useEffect(() => {
-    if (!isInitializing && videoRef.current && selectedCamera) {
+    if (!isInitializing && videoRef.current && selectedCamera && !isSwitchingCamera) {
       console.log('Video element ready, initializing scanner...');
       // Small delay to ensure video element is fully rendered
       setTimeout(() => {
         initializeScanner();
       }, 100);
     }
-  }, [isInitializing, selectedCamera]);
+  }, [isInitializing, selectedCamera, isSwitchingCamera]);
 
   // Handle camera selection change
   const handleCameraChange = async (cameraId: string) => {
+    if (isSwitchingCamera) {
+      console.log('Camera switch already in progress, ignoring...');
+      return;
+    }
+    
     console.log('Changing camera to:', cameraId);
-    setSelectedCamera(cameraId);
-    await initializeScanner(cameraId);
+    setIsSwitchingCamera(true);
+    setError(''); // Clear any previous errors
+    
+    try {
+      // Step 1: Stop the QR scanner
+      if (qrScannerRef.current) {
+        try {
+          console.log('Stopping existing QR scanner for camera switch...');
+          qrScannerRef.current.stop();
+          qrScannerRef.current.destroy();
+          console.log('Existing QR scanner destroyed for camera switch');
+        } catch (e) {
+          console.warn('Error cleaning up previous scanner during switch:', e);
+        }
+        qrScannerRef.current = null;
+      }
+
+      // Step 2: Stop all video tracks and wait for them to fully stop
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        const tracks = stream.getTracks();
+        
+        console.log('Stopping video tracks:', tracks.length);
+        tracks.forEach(track => {
+          console.log('Stopping video track:', track.label);
+          track.stop();
+        });
+        
+        // Wait for tracks to actually stop
+        await new Promise<void>((resolve) => {
+          const checkTracks = () => {
+            const activeTracks = tracks.filter(track => track.readyState === 'live');
+            if (activeTracks.length === 0) {
+              console.log('All video tracks stopped');
+              resolve();
+            } else {
+              console.log('Waiting for tracks to stop, active:', activeTracks.length);
+              setTimeout(checkTracks, 50);
+            }
+          };
+          checkTracks();
+        });
+        
+        videoRef.current.srcObject = null;
+      }
+
+      // Step 3: Update state
+      setSelectedCamera(cameraId);
+      
+      // Step 4: Reset video element
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+        videoRef.current.load();
+      }
+      
+      // Step 5: Wait for everything to be ready
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+      // Step 6: Initialize the new camera
+      await initializeScanner(cameraId);
+      console.log('Camera switch completed successfully');
+    } catch (error) {
+      console.error('Error switching camera:', error);
+      setError(`Failed to switch camera: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSwitchingCamera(false);
+    }
   };
 
   // Handle scanning state changes
@@ -199,6 +359,32 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
   // Retry function
   const handleRetry = async () => {
     setError('');
+    console.log('Retrying camera initialization...');
+    
+    // Force cleanup before retry
+    if (qrScannerRef.current) {
+      try {
+        qrScannerRef.current.stop();
+        qrScannerRef.current.destroy();
+      } catch (e) {
+        console.warn('Error during retry cleanup:', e);
+      }
+      qrScannerRef.current = null;
+    }
+    
+    // Clean up video tracks
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => {
+        console.log('Stopping video track during retry:', track.label);
+        track.stop();
+      });
+      videoRef.current.srcObject = null;
+    }
+    
+    // Wait a bit before retrying
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
     if (videoRef.current && selectedCamera) {
       await initializeScanner();
     } else {
@@ -289,7 +475,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
           <select
             value={selectedCamera}
             onChange={(e) => handleCameraChange(e.target.value)}
-            disabled={isInitializing}
+            disabled={isInitializing || isSwitchingCamera}
             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none pr-10 disabled:opacity-50"
           >
             {cameras.map((camera) => (
@@ -340,8 +526,15 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
 
             {/* Camera info */}
             {cameras.length > 0 && (
-              <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-xs">
-                {cameras.find(c => c.id === selectedCamera)?.label || 'Camera'}
+              <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                {isSwitchingCamera ? (
+                  <>
+                    <div className="w-2 h-2 border border-white border-t-transparent rounded-full animate-spin"></div>
+                    Switching camera...
+                  </>
+                ) : (
+                  cameras.find(c => c.id === selectedCamera)?.label || 'Camera'
+                )}
               </div>
             )}
           </>

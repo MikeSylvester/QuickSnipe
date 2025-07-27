@@ -13,6 +13,7 @@ interface ConfigModalProps {
     techBenchLocationId: number;
     storageLocationId: number;
     returnBinLocationId: number;
+    preferredCamera: string;
     labelSettings: {
       widthMM: number;
       heightMM: number;
@@ -34,6 +35,7 @@ interface ConfigModalProps {
     techBenchLocationId: number;
     storageLocationId: number;
     returnBinLocationId: number;
+    preferredCamera: string;
     labelSettings: {
       widthMM: number;
       heightMM: number;
@@ -66,6 +68,9 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
   const [techBenchLocationId, setTechBenchLocationId] = useState(currentConfig.techBenchLocationId || '');
   const [storageLocationId, setStorageLocationId] = useState(currentConfig.storageLocationId || '');
   const [returnBinLocationId, setReturnBinLocationId] = useState(currentConfig.returnBinLocationId || '');
+  const [preferredCamera, setPreferredCamera] = useState(currentConfig.preferredCamera || '');
+  const [availableCameras, setAvailableCameras] = useState<Array<{ id: string; label: string }>>([]);
+  const [loadingCameras, setLoadingCameras] = useState(false);
   const [showLabelSettings, setShowLabelSettings] = useState(false);
   const [showLabelPreview, setShowLabelPreview] = useState(false);
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
@@ -141,6 +146,36 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseUrl, apiToken]);
 
+  // Load available cameras
+  const loadAvailableCameras = async () => {
+    setLoadingCameras(true);
+    try {
+      // Request camera permission first
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Get available cameras
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      const cameraDevices = videoDevices.map(device => ({
+        id: device.deviceId,
+        label: device.label || `Camera ${device.deviceId}`
+      }));
+      
+      setAvailableCameras(cameraDevices);
+    } catch (error) {
+      console.error('Error loading cameras:', error);
+      setAvailableCameras([]);
+    } finally {
+      setLoadingCameras(false);
+    }
+  };
+
+  // Load cameras when component mounts
+  useEffect(() => {
+    loadAvailableCameras();
+  }, []);
+
 
 
   const handleSave = async (e?: React.FormEvent) => {
@@ -155,6 +190,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
       techBenchLocationId: Number(techBenchLocationId),
       storageLocationId: Number(storageLocationId),
       returnBinLocationId: Number(returnBinLocationId),
+      preferredCamera,
       labelSettings
     };
     await onSave(configToSave);
@@ -361,6 +397,29 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label htmlFor="preferredCamera" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Preferred Camera
+              </label>
+              <select
+                id="preferredCamera"
+                value={preferredCamera}
+                onChange={e => setPreferredCamera(e.target.value)}
+                className="w-full px-4 py-3 text-lg border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-orange-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                disabled={loadingCameras}
+              >
+                <option value="">{loadingCameras ? 'Loading cameras...' : 'Select preferred camera (optional)'}</option>
+                {availableCameras.map(camera => (
+                  <option key={camera.id} value={camera.label}>
+                    {camera.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Select your preferred camera. If not selected, the system will use the back camera or first available camera.
+              </p>
             </div>
 
             {/* Label Settings Section */}

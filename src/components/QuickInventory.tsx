@@ -331,6 +331,7 @@ export const QuickInventory: React.FC<QuickInventoryProps> = ({ onBack, config, 
         <CameraScanner
           onQrDetected={handleQrDetected}
           isScanning={true}
+          preferredCamera={config.preferredCamera}
         />
         {loading && (
           <div className="mt-4 text-center">
