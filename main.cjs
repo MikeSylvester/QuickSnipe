@@ -31,13 +31,21 @@ function decrypt(text) {
 }
 
 function createWindow() {
+  // Determine the correct icon path
+  const iconPath = path.join(__dirname, 'assets', 'icons', 'icon.ico');
+  console.log('Icon path:', iconPath);
+  
+  // Check if icon file exists
+  const iconExists = fs.existsSync(iconPath);
+  console.log('Icon exists:', iconExists);
+  
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
     fullscreen: false,
     kiosk: false,
     autoHideMenuBar: true,
-    icon: path.join(__dirname, 'assets', 'icons', 'icon.ico'),
+    icon: iconExists ? iconPath : undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
@@ -159,6 +167,13 @@ app.whenReady().then(() => {
       callback(false);
     }
   });
+  
+  // Set the application icon explicitly
+  const iconPath = path.join(__dirname, 'assets', 'icons', 'icon.ico');
+  if (fs.existsSync(iconPath)) {
+    app.setAppUserModelId('com.yourcompany.quicksnipe');
+  }
+  
   createWindow();
 });
 

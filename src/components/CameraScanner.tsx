@@ -64,9 +64,9 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
         // If preferred camera not found, try back camera
         if (!targetCamera) {
           targetCamera = cameraDevices.find(cam => 
-            cam.label.toLowerCase().includes('back') || 
-            cam.label.toLowerCase().includes('environment')
-          );
+          cam.label.toLowerCase().includes('back') || 
+          cam.label.toLowerCase().includes('environment')
+        );
           console.log('Preferred camera not found, using back camera:', targetCamera?.label);
         }
         
@@ -316,7 +316,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
       }
 
       // Step 3: Update state
-      setSelectedCamera(cameraId);
+    setSelectedCamera(cameraId);
       
       // Step 4: Reset video element
       if (videoRef.current) {
@@ -329,7 +329,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onQrDetected, isSc
       await new Promise(resolve => setTimeout(resolve, 150));
       
       // Step 6: Initialize the new camera
-      await initializeScanner(cameraId);
+    await initializeScanner(cameraId);
       console.log('Camera switch completed successfully');
     } catch (error) {
       console.error('Error switching camera:', error);

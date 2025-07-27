@@ -47,11 +47,13 @@
     "appId": "com.yourcompany.quicksnipe",
     "artifactName": "${productName}.${ext}",
     "productName": "Quicksnipe",
+    "icon": "assets/icons/icon.ico",
     "files": [
       "dist/**/*",
       "main.cjs",
       "preload.cjs",
-      "package.json"
+      "package.json",
+      "assets/**/*"
     ],
     "directories": {
       "buildResources": "assets"
@@ -62,8 +64,11 @@
     },
     "nsis": {
       "perMachine": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false,
+      "installerIcon": "assets/icons/icon.ico",
+      "uninstallerIcon": "assets/icons/icon.ico",
+      "include": "build/installer.nsh"
     }
   }
 }
