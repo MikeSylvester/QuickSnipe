@@ -25,6 +25,15 @@ interface ConfigModalProps {
       includeSerial: boolean;
       includeAssetTag: boolean;
       useVerticalLayout: boolean;
+      // New settings for enhanced label customization
+      nameFontSize: number;
+      modelFontSize: number;
+      serialFontSize: number;
+      assetTagFontSize: number;
+      namePosition: 'right' | 'below';
+      modelPosition: 'right' | 'below';
+      serialPosition: 'right' | 'below';
+      assetTagPosition: 'right' | 'below';
     };
   }) => void;
   currentConfig: { 
@@ -47,6 +56,15 @@ interface ConfigModalProps {
       includeSerial: boolean;
       includeAssetTag: boolean;
       useVerticalLayout: boolean;
+      // New settings for enhanced label customization
+      nameFontSize: number;
+      modelFontSize: number;
+      serialFontSize: number;
+      assetTagFontSize: number;
+      namePosition: 'right' | 'below';
+      modelPosition: 'right' | 'below';
+      serialPosition: 'right' | 'below';
+      assetTagPosition: 'right' | 'below';
     };
   };
   darkMode?: boolean;
@@ -84,7 +102,16 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     includeModel: true,
     includeSerial: true,
     includeAssetTag: true,
-    useVerticalLayout: false
+    useVerticalLayout: false,
+    // New settings for enhanced label customization
+    nameFontSize: 12,
+    modelFontSize: 12,
+    serialFontSize: 12,
+    assetTagFontSize: 12,
+    namePosition: 'right',
+    modelPosition: 'right',
+    serialPosition: 'right',
+    assetTagPosition: 'right',
   });
 
   // Sample equipment data for preview
@@ -502,27 +529,92 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Font Size */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Base Font Size ({labelSettings.baseFontSize}px)
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="range"
-                        value={labelSettings.baseFontSize}
-                        onChange={e => setLabelSettings({...labelSettings, baseFontSize: Number(e.target.value)})}
-                        className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
-                        min="8"
-                        max="20"
-                        step="1"
-                        style={{
-                          background: `linear-gradient(to right, #f97316 0%, #f97316 ${(labelSettings.baseFontSize - 8) / 12 * 100}%, #e5e7eb ${(labelSettings.baseFontSize - 8) / 12 * 100}%, #e5e7eb 100%)`
-                        }}
-                      />
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        <span>8px</span>
-                        <span>20px</span>
+                  {/* Font Sizes */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Font Sizes:</h4>
+                    
+                    {/* Base Font Size */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Base Font Size ({labelSettings.baseFontSize}px)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          value={labelSettings.baseFontSize}
+                          onChange={e => setLabelSettings({...labelSettings, baseFontSize: Number(e.target.value)})}
+                          className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
+                          min="8"
+                          max="32"
+                          step="1"
+                          style={{
+                            background: `linear-gradient(to right, #f97316 0%, #f97316 ${(labelSettings.baseFontSize - 8) / 24 * 100}%, #e5e7eb ${(labelSettings.baseFontSize - 8) / 24 * 100}%, #e5e7eb 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <span>8px</span>
+                          <span>32px</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Individual Font Sizes */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Name Font Size ({labelSettings.nameFontSize}px)
+                        </label>
+                        <input
+                          type="range"
+                          value={labelSettings.nameFontSize}
+                          onChange={e => setLabelSettings({...labelSettings, nameFontSize: Number(e.target.value)})}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
+                          min="8"
+                          max="40"
+                          step="1"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Model Font Size ({labelSettings.modelFontSize}px)
+                        </label>
+                        <input
+                          type="range"
+                          value={labelSettings.modelFontSize}
+                          onChange={e => setLabelSettings({...labelSettings, modelFontSize: Number(e.target.value)})}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
+                          min="8"
+                          max="40"
+                          step="1"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Serial Font Size ({labelSettings.serialFontSize}px)
+                        </label>
+                        <input
+                          type="range"
+                          value={labelSettings.serialFontSize}
+                          onChange={e => setLabelSettings({...labelSettings, serialFontSize: Number(e.target.value)})}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
+                          min="8"
+                          max="40"
+                          step="1"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Asset Tag Font Size ({labelSettings.assetTagFontSize}px)
+                        </label>
+                        <input
+                          type="range"
+                          value={labelSettings.assetTagFontSize}
+                          onChange={e => setLabelSettings({...labelSettings, assetTagFontSize: Number(e.target.value)})}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
+                          min="8"
+                          max="40"
+                          step="1"
+                        />
                       </div>
                     </div>
                   </div>
@@ -610,11 +702,70 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                     </div>
                   </div>
 
+                  {/* Element Positioning */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Element Positioning:</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Name Position
+                        </label>
+                        <select
+                          value={labelSettings.namePosition}
+                          onChange={e => setLabelSettings({...labelSettings, namePosition: e.target.value as 'right' | 'below'})}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                        >
+                          <option value="right">Right of QR Code</option>
+                          <option value="below">Below QR Code</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Model Position
+                        </label>
+                        <select
+                          value={labelSettings.modelPosition}
+                          onChange={e => setLabelSettings({...labelSettings, modelPosition: e.target.value as 'right' | 'below'})}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                        >
+                          <option value="right">Right of QR Code</option>
+                          <option value="below">Below QR Code</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Serial Position
+                        </label>
+                        <select
+                          value={labelSettings.serialPosition}
+                          onChange={e => setLabelSettings({...labelSettings, serialPosition: e.target.value as 'right' | 'below'})}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                        >
+                          <option value="right">Right of QR Code</option>
+                          <option value="below">Below QR Code</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Asset Tag Position
+                        </label>
+                        <select
+                          value={labelSettings.assetTagPosition}
+                          onChange={e => setLabelSettings({...labelSettings, assetTagPosition: e.target.value as 'right' | 'below'})}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                        >
+                          <option value="right">Right of QR Code</option>
+                          <option value="below">Below QR Code</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Preview Info */}
                   <div className="text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-600 rounded p-2">
                     <p>Preview: {labelSettings.widthMM}mm × {labelSettings.heightMM}mm label</p>
                     <p>QR Code: {Math.round(labelSettings.qrCodeSize * 100)}% of available space</p>
-                    <p>Font: {labelSettings.baseFontSize}px base size</p>
+                    <p>Font Sizes: Name({labelSettings.nameFontSize}px), Model({labelSettings.modelFontSize}px), Serial({labelSettings.serialFontSize}px), Tag({labelSettings.assetTagFontSize}px)</p>
                   </div>
                 </div>
               )}

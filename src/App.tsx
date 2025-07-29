@@ -50,7 +50,16 @@ function App() {
       includeModel: true,
       includeSerial: true,
       includeAssetTag: true,
-      useVerticalLayout: false
+      useVerticalLayout: false,
+      // New settings for enhanced label customization
+      nameFontSize: 12,
+      modelFontSize: 12,
+      serialFontSize: 12,
+      assetTagFontSize: 12,
+      namePosition: 'right' as 'right' | 'below',
+      modelPosition: 'right' as 'right' | 'below',
+      serialPosition: 'right' as 'right' | 'below',
+      assetTagPosition: 'right' as 'right' | 'below',
     }
   });
   const [configLoaded, setConfigLoaded] = useState(false);
@@ -106,7 +115,16 @@ function App() {
             includeModel: electronConfig.labelSettings.includeModel ?? true,
             includeSerial: electronConfig.labelSettings.includeSerial ?? true,
             includeAssetTag: electronConfig.labelSettings.includeAssetTag ?? true,
-            useVerticalLayout: electronConfig.labelSettings.useVerticalLayout ?? false
+            useVerticalLayout: electronConfig.labelSettings.useVerticalLayout ?? false,
+            // New settings for enhanced label customization
+            nameFontSize: electronConfig.labelSettings.nameFontSize ?? 12,
+            modelFontSize: electronConfig.labelSettings.modelFontSize ?? 12,
+            serialFontSize: electronConfig.labelSettings.serialFontSize ?? 12,
+            assetTagFontSize: electronConfig.labelSettings.assetTagFontSize ?? 12,
+            namePosition: electronConfig.labelSettings.namePosition ?? 'right',
+            modelPosition: electronConfig.labelSettings.modelPosition ?? 'right',
+            serialPosition: electronConfig.labelSettings.serialPosition ?? 'right',
+            assetTagPosition: electronConfig.labelSettings.assetTagPosition ?? 'right'
           } : {
             widthMM: 40,
             heightMM: 30,
@@ -117,7 +135,16 @@ function App() {
             includeModel: true,
             includeSerial: true,
             includeAssetTag: true,
-            useVerticalLayout: false
+            useVerticalLayout: false,
+            // New settings for enhanced label customization
+            nameFontSize: 12,
+            modelFontSize: 12,
+            serialFontSize: 12,
+            assetTagFontSize: 12,
+            namePosition: 'right' as const,
+            modelPosition: 'right' as const,
+            serialPosition: 'right' as const,
+            assetTagPosition: 'right' as const
           }
         });
       } else {
@@ -155,7 +182,16 @@ function App() {
             includeModel: true,
             includeSerial: true,
             includeAssetTag: true,
-            useVerticalLayout: false
+            useVerticalLayout: false,
+            // New settings for enhanced label customization
+            nameFontSize: 12,
+            modelFontSize: 12,
+            serialFontSize: 12,
+            assetTagFontSize: 12,
+            namePosition: 'right' as const,
+            modelPosition: 'right' as const,
+            serialPosition: 'right' as const,
+            assetTagPosition: 'right' as const
           }
         });
       }
@@ -194,6 +230,15 @@ function App() {
       includeSerial: boolean;
       includeAssetTag: boolean;
       useVerticalLayout: boolean;
+      // New settings for enhanced label customization
+      nameFontSize: number;
+      modelFontSize: number;
+      serialFontSize: number;
+      assetTagFontSize: number;
+      namePosition: 'right' | 'below';
+      modelPosition: 'right' | 'below';
+      serialPosition: 'right' | 'below';
+      assetTagPosition: 'right' | 'below';
     };
   }) => {
     const updatedConfig = { 

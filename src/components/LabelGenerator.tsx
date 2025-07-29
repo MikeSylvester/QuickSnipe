@@ -31,7 +31,16 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
     includeModel: true,
     includeSerial: true,
     includeAssetTag: true,
-    useVerticalLayout: false
+    useVerticalLayout: false,
+    // New settings for enhanced label customization
+    nameFontSize: 12,
+    modelFontSize: 12,
+    serialFontSize: 12,
+    assetTagFontSize: 12,
+    namePosition: 'right' as const,
+    modelPosition: 'right' as const,
+    serialPosition: 'right' as const,
+    assetTagPosition: 'right' as const,
   };
 
   const generateQRCode = async (text: string): Promise<string> => {
@@ -96,26 +105,48 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
 
-      // Calculate font sizes based on available space and settings
-      const baseFontSize = Math.max(8, Math.min(20, labelSettings.baseFontSize));
-      
-      // Build text lines based on settings
-      const textLines = [];
+      // Build text elements with individual settings
+      const textElements = [];
       if (labelSettings.includeName) {
-        textLines.push({ text: equipment.name || 'Unnamed Asset', bold: true, size: baseFontSize + 3 });
+        textElements.push({ 
+          text: equipment.name || 'Unnamed Asset', 
+          bold: true, 
+          size: labelSettings.nameFontSize,
+          position: labelSettings.namePosition
+        });
       }
       if (labelSettings.includeModel) {
-        textLines.push({ text: equipment.model?.name || 'Unknown', bold: false, size: baseFontSize + 1 });
+        textElements.push({ 
+          text: equipment.model?.name || 'Unknown', 
+          bold: false, 
+          size: labelSettings.modelFontSize,
+          position: labelSettings.modelPosition
+        });
       }
       if (labelSettings.includeSerial) {
-        textLines.push({ text: equipment.serial || 'N/A', bold: false, size: baseFontSize + 1 });
+        textElements.push({ 
+          text: equipment.serial || 'N/A', 
+          bold: false, 
+          size: labelSettings.serialFontSize,
+          position: labelSettings.serialPosition
+        });
       }
       if (labelSettings.includeAssetTag) {
-        textLines.push({ text: equipment.asset_tag, bold: false, size: baseFontSize + 1 });
+        textElements.push({ 
+          text: equipment.asset_tag, 
+          bold: false, 
+          size: labelSettings.assetTagFontSize,
+          position: labelSettings.assetTagPosition
+        });
       }
       
-      const totalTextHeight = textLines.reduce((sum, line) => sum + line.size + 4, 0) + 8;
-      const useVerticalLayout = labelSettings.useVerticalLayout || totalTextHeight > (heightPx - margin * 2) * 0.4;
+      // Separate elements by position
+      const rightElements = textElements.filter(el => el.position === 'right');
+      const belowElements = textElements.filter(el => el.position === 'below');
+      
+      // Calculate total height for right elements
+      const rightElementsHeight = rightElements.reduce((sum, el) => sum + el.size + 4, 0) + 8;
+      const useVerticalLayout = labelSettings.useVerticalLayout || rightElementsHeight > (heightPx - margin * 2) * 0.4;
       
       if (useVerticalLayout) {
         // Vertical layout: QR code on top, text below
@@ -125,28 +156,40 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
         // Draw QR code centered at top
         ctx.drawImage(qrImage, qrLeftMargin, qrTopMargin, qrSize, qrSize);
         
-        // Draw text below QR code
+        // Draw all text elements below QR code
         let yOffset = qrTopMargin + qrSize + margin;
         ctx.textAlign = 'center';
         
-        textLines.forEach(line => {
-          ctx.font = `${line.bold ? 'bold' : 'normal'} ${line.size}px Arial`;
-          ctx.fillText(line.text, widthPx / 2, yOffset);
-          yOffset += line.size + 4;
+        [...rightElements, ...belowElements].forEach(element => {
+          ctx.font = `${element.bold ? 'bold' : 'normal'} ${element.size}px Arial`;
+          ctx.fillText(element.text, widthPx / 2, yOffset);
+          yOffset += element.size + 4;
         });
       } else {
         // Horizontal layout: QR code on left, text on right
         ctx.drawImage(qrImage, margin, margin, qrSize, qrSize);
         
-        // Draw text on the right
+        // Draw right-positioned elements
         let yOffset = margin;
         ctx.textAlign = 'left';
         
-        textLines.forEach(line => {
-          ctx.font = `${line.bold ? 'bold' : 'normal'} ${line.size}px Arial`;
-          ctx.fillText(line.text, textAreaX, yOffset);
-          yOffset += line.size + 4;
+        rightElements.forEach(element => {
+          ctx.font = `${element.bold ? 'bold' : 'normal'} ${element.size}px Arial`;
+          ctx.fillText(element.text, textAreaX, yOffset);
+          yOffset += element.size + 4;
         });
+        
+        // Draw below-positioned elements below QR code
+        if (belowElements.length > 0) {
+          let belowYOffset = margin + qrSize + margin;
+          ctx.textAlign = 'center';
+          
+          belowElements.forEach(element => {
+            ctx.font = `${element.bold ? 'bold' : 'normal'} ${element.size}px Arial`;
+            ctx.fillText(element.text, widthPx / 2, belowYOffset);
+            belowYOffset += element.size + 4;
+          });
+        }
       }
 
       // Add border
@@ -272,13 +315,19 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
         <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
           <p>• Size: {labelSettings.widthMM}mm × {labelSettings.heightMM}mm</p>
           <p>• QR Code: {Math.round(labelSettings.qrCodeSize * 100)}% of available space</p>
-          <p>• Font: {labelSettings.baseFontSize}px base size</p>
+          <p>• Font Sizes: Name({labelSettings.nameFontSize}px), Model({labelSettings.modelFontSize}px), Serial({labelSettings.serialFontSize}px), Tag({labelSettings.assetTagFontSize}px)</p>
           <p>• Layout: {labelSettings.useVerticalLayout ? 'Vertical' : 'Automatic'}</p>
           <p>• Content: {[
             labelSettings.includeName && 'Name',
             labelSettings.includeModel && 'Model', 
             labelSettings.includeSerial && 'Serial',
             labelSettings.includeAssetTag && 'Asset Tag'
+          ].filter(Boolean).join(', ')}</p>
+          <p>• Positioning: {[
+            labelSettings.includeName && `Name(${labelSettings.namePosition})`,
+            labelSettings.includeModel && `Model(${labelSettings.modelPosition})`, 
+            labelSettings.includeSerial && `Serial(${labelSettings.serialPosition})`,
+            labelSettings.includeAssetTag && `Tag(${labelSettings.assetTagPosition})`
           ].filter(Boolean).join(', ')}</p>
         </div>
       </div>
