@@ -55,8 +55,66 @@ function createWindow() {
 
   win.maximize();
 
-  // Disable menu
-  Menu.setApplicationMenu(null);
+  // Enable menu for debugging
+  // Menu.setApplicationMenu(null);
+  
+  // Create menu for debugging
+  const template = [
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Developer Tools',
+          accelerator: 'F12',
+          click: () => {
+            win.webContents.openDevTools();
+          }
+        },
+        {
+          label: 'Reload',
+          accelerator: 'CmdOrCtrl+R',
+          click: () => {
+            win.reload();
+          }
+        },
+        {
+          label: 'Exit',
+          accelerator: 'CmdOrCtrl+Q',
+          click: () => {
+            app.quit();
+          }
+        }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    }
+  ];
+  
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 
   if (process.env.NODE_ENV === 'development') {
     win.loadURL('http://localhost:5173');

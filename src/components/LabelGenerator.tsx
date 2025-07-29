@@ -281,7 +281,7 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
             window.onload = function() {
               // Small delay to ensure everything is loaded
               setTimeout(() => {
-                window.print();
+              window.print();
               }, 100);
             };
           </script>

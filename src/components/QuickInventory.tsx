@@ -253,23 +253,60 @@ export const QuickInventory: React.FC<QuickInventoryProps> = ({ onBack, config, 
         updateData.location_id = selectedLocationId;
       }
 
-      const extraFields: any = {};
-      if (selectedUserId) {
-        extraFields.assigned_user = selectedUserId;
-      } else {
-        extraFields.assigned_user = null;
-      }
+      let success = false;
+      
+      if (selectedUserId !== null) {
+        // Assign user
+        const extraFields: any = {
+          assigned_user: selectedUserId
+        };
 
-      const success = await snipeItApi.updateEquipmentStatus(
-        equipment.id,
-        updateData,
-        extraFields
-      );
+        console.log('QuickInventory - Sending update request:', {
+          equipmentId: equipment.id,
+          updateData,
+          extraFields,
+          selectedUserId
+        });
+
+        success = await snipeItApi.updateEquipmentStatus(
+          equipment.id,
+          updateData,
+          extraFields
+        );
+      } else {
+        // Unassign user and update other fields
+        console.log('QuickInventory - Unassigning user and updating fields:', {
+          equipmentId: equipment.id,
+          updateData
+        });
+        
+        // First unassign the user
+        try {
+          await snipeItApi.checkinEquipment(equipment.id);
+        } catch (error) {
+          console.error('Failed to unassign user:', error);
+        }
+        
+        // Then update other fields
+        success = await snipeItApi.updateEquipmentStatus(
+          equipment.id,
+          updateData,
+          {}
+        );
+      }
 
       if (success) {
         showToast('Asset updated successfully!', 'success');
         // Refresh equipment data
+        console.log('QuickInventory - Refreshing equipment after update...');
         const updated = await snipeItApi.getEquipmentById(equipment.id);
+        console.log('QuickInventory - Updated equipment data:', {
+          id: updated?.id,
+          asset_tag: updated?.asset_tag,
+          assigned_to: updated?.assigned_to,
+          status_label: updated?.status_label,
+          location: updated?.location
+        });
         if (updated) {
           setEquipment(updated);
           initializeEquipmentState(updated);
@@ -277,8 +314,23 @@ export const QuickInventory: React.FC<QuickInventoryProps> = ({ onBack, config, 
       } else {
         showToast('Failed to update asset', 'error');
       }
-    } catch (err) {
-      showToast('Failed to update asset', 'error');
+    } catch (error: any) {
+      console.error('Failed to update asset:', error);
+      let errorMessage = 'Failed to update asset';
+      
+      if (error.response?.status === 422) {
+        errorMessage = 'Validation error - please check the data';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'Permission denied - you may not have access to modify this asset';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Asset not found - it may have been deleted';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Server error - please try again later';
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage = 'Request timed out - please check your connection';
+      }
+      
+      showToast(errorMessage, 'error');
     } finally {
       setUpdateLoading(false);
     }

@@ -26,6 +26,8 @@ class SnipeItApiService {
         throw new Error('API configuration not set');
       }
 
+      console.log(`Fetching equipment ${id}...`);
+      
       const response = await axios.get(
         `${this.baseUrl}/api/v1/hardware/${id}`,
         { 
@@ -34,31 +36,85 @@ class SnipeItApiService {
         }
       );
 
-      return response.data;
+      const equipment = response.data;
+      console.log(`Equipment ${id} fetched:`, {
+        id: equipment?.id,
+        asset_tag: equipment?.asset_tag,
+        assigned_to: equipment?.assigned_to,
+        status_label: equipment?.status_label,
+        location: equipment?.location
+      });
+
+      return equipment;
     } catch (error) {
-      console.error('Error fetching equipment:', error);
+      console.error(`Error fetching equipment ${id}:`, error);
       throw error;
     }
   }
 
   async updateEquipmentStatus(id: number, update: StatusUpdate, extraFields?: Record<string, any>): Promise<boolean> {
-    try {
-      if (!this.apiToken) {
-        throw new Error('API configuration not set');
-      }
-      const response = await axios.patch(
-        `${this.baseUrl}/api/v1/hardware/${id}`,
-        { ...update, ...(extraFields || {}) },
-        { 
-          headers: this.getHeaders(),
-          timeout: 10000
+    const maxRetries = 3;
+    let lastError: any;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        if (!this.apiToken) {
+          throw new Error('API configuration not set');
         }
-      );
-      return response.status === 200;
-    } catch (error) {
-      console.error('Error updating equipment status:', error);
-      throw error;
+        
+        const requestData = { ...update, ...(extraFields || {}) };
+        
+        const response = await axios.patch(
+          `${this.baseUrl}/api/v1/hardware/${id}`,
+          requestData,
+          { 
+            headers: this.getHeaders(),
+            timeout: 15000 // Increased timeout for slower connections
+          }
+        );
+        
+        // Check if the response indicates success
+        const isSuccess = response.status >= 200 && response.status < 300;
+        
+        console.log(`Equipment ${id} update response (attempt ${attempt}):`, {
+          status: response.status,
+          statusText: response.statusText,
+          success: isSuccess,
+          responseData: response.data,
+          requestData: requestData
+        });
+        
+        if (!isSuccess) {
+          console.error(`Failed to update equipment ${id} (attempt ${attempt}):`, {
+            status: response.status,
+            data: response.data
+          });
+          lastError = new Error(`HTTP ${response.status}: ${JSON.stringify(response.data)}`);
+          continue; // Try again
+        }
+        
+        return true; // Success
+      } catch (error: any) {
+        lastError = error;
+        console.error(`Error updating equipment ${id} (attempt ${attempt}):`, {
+          error: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        
+        // Don't retry on 4xx errors (client errors)
+        if (error.response?.status >= 400 && error.response?.status < 500) {
+          break;
+        }
+        
+        // Wait before retrying (exponential backoff)
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
     }
+    
+    throw lastError;
   }
 
   // Get status IDs for the three actions
@@ -131,17 +187,72 @@ class SnipeItApiService {
       if (!this.apiToken) {
         throw new Error('API configuration not set');
       }
+      
+      // First get the current equipment data to preserve status and location
+      const currentEquipment = await this.getEquipmentById(id);
+      if (!currentEquipment) {
+        throw new Error('Could not fetch current equipment data');
+      }
+      
+      console.log(`Unassigning equipment ${id} - current data:`, {
+        status_id: currentEquipment.status_label?.id,
+        location_id: currentEquipment.location?.id,
+        assigned_to: currentEquipment.assigned_to
+      });
+      
+      // Try multiple approaches for unassigning while preserving current status/location
+      const unassignData = {
+        assigned_to: null,
+        assigned_user: null,
+        checkout_to_type: null,
+        assigned_asset: null,
+        // Preserve current status and location
+        status_id: currentEquipment.status_label?.id,
+        location_id: currentEquipment.location?.id
+      };
+      
+      console.log(`Unassigning equipment ${id} - sending data:`, unassignData);
+      
       const response = await axios.patch(
         `${this.baseUrl}/api/v1/hardware/${id}`,
-        { assigned_to: null },
+        unassignData,
         {
           headers: this.getHeaders(),
           timeout: 10000
         }
       );
+      
+      console.log(`Unassign equipment ${id} response:`, {
+        status: response.status,
+        data: response.data
+      });
+      
       return response.status === 200;
-    } catch (error) {
-      console.error('Error unassigning equipment:', error);
+    } catch (error: any) {
+      console.error(`Error unassigning equipment ${id}:`, error);
+      throw error;
+    }
+  }
+
+  // Try checkin endpoint to unassign equipment
+  async checkinEquipment(id: number): Promise<boolean> {
+    try {
+      if (!this.apiToken) {
+        throw new Error('API configuration not set');
+      }
+      
+      const response = await axios.post(
+        `${this.baseUrl}/api/v1/hardware/${id}/checkin`,
+        {},
+        {
+          headers: this.getHeaders(),
+          timeout: 10000
+        }
+      );
+      
+      return response.status === 200;
+    } catch (error: any) {
+      console.error('Error checking in equipment:', error);
       throw error;
     }
   }

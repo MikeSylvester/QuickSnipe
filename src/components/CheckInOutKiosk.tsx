@@ -222,7 +222,7 @@ export const CheckInOutKiosk: React.FC<CheckInOutKioskProps> = ({ onBack, config
         notes: `Checked out via Kiosk - ${checkoutDuration.label}`
       };
 
-      const extraFields = { assigned_user: selectedUserId };
+              const extraFields = { assigned_user: selectedUserId };
 
       const success = await snipeItApi.updateEquipmentStatus(
         equipment.id,
@@ -257,7 +257,7 @@ export const CheckInOutKiosk: React.FC<CheckInOutKioskProps> = ({ onBack, config
         notes: 'Checked in via Kiosk'
       };
 
-      const extraFields = { assigned_user: null };
+              const extraFields = { assigned_user: null };
 
       const success = await snipeItApi.updateEquipmentStatus(
         equipment.id,
