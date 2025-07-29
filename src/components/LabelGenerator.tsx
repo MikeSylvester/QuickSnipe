@@ -144,9 +144,9 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
       const rightElements = textElements.filter(el => el.position === 'right');
       const belowElements = textElements.filter(el => el.position === 'below');
       
-      // Calculate total height for right elements
-      const rightElementsHeight = rightElements.reduce((sum, el) => sum + el.size + 4, 0) + 8;
-      const useVerticalLayout = labelSettings.useVerticalLayout || rightElementsHeight > (heightPx - margin * 2) * 0.4;
+      // Calculate total height for right elements (for reference only)
+      const rightElementsHeight = rightElements.reduce((sum, el) => sum + el.size + 8, 0) + 8; // Increased vertical margin
+      const useVerticalLayout = labelSettings.useVerticalLayout; // Only use manual setting
       
       if (useVerticalLayout) {
         // Vertical layout: QR code on top, text below
@@ -163,7 +163,7 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
         [...rightElements, ...belowElements].forEach(element => {
           ctx.font = `${element.bold ? 'bold' : 'normal'} ${element.size}px Arial`;
           ctx.fillText(element.text, widthPx / 2, yOffset);
-          yOffset += element.size + 4;
+          yOffset += element.size + 8; // Increased vertical margin between elements
         });
       } else {
         // Horizontal layout: QR code on left, text on right
@@ -176,7 +176,7 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
         rightElements.forEach(element => {
           ctx.font = `${element.bold ? 'bold' : 'normal'} ${element.size}px Arial`;
           ctx.fillText(element.text, textAreaX, yOffset);
-          yOffset += element.size + 4;
+          yOffset += element.size + 8; // Increased vertical margin between elements
         });
         
         // Draw below-positioned elements below QR code
@@ -187,7 +187,7 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
           belowElements.forEach(element => {
             ctx.font = `${element.bold ? 'bold' : 'normal'} ${element.size}px Arial`;
             ctx.fillText(element.text, widthPx / 2, belowYOffset);
-            belowYOffset += element.size + 4;
+            belowYOffset += element.size + 8; // Increased vertical margin between elements
           });
         }
       }
@@ -220,6 +220,13 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
     const canvas = canvasRef.current;
     const dataUrl = canvas.toDataURL('image/png');
 
+    // Calculate the actual size in inches for printing
+    const dpi = 300;
+    const widthMM = labelSettings.widthMM;
+    const heightMM = labelSettings.heightMM;
+    const widthInches = widthMM / 25.4;
+    const heightInches = heightMM / 25.4;
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -228,39 +235,54 @@ export const LabelGenerator: React.FC<LabelGeneratorProps> = ({
           <style>
             body {
               margin: 0;
-              padding: 20px;
+              padding: 0;
+              background: white;
               display: flex;
               justify-content: center;
               align-items: center;
               min-height: 100vh;
-              background: white;
             }
-            .label {
+            .label-container {
+              width: ${widthInches}in;
+              height: ${heightInches}in;
+              display: flex;
+              justify-content: center;
+              align-items: center;
               border: 1px solid #ccc;
-              padding: 10px;
+              margin: 10px;
             }
-            img {
-              max-width: 100%;
-              height: auto;
+            .label-image {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
             }
             @media print {
               body {
+                margin: 0;
                 padding: 0;
               }
-              .label {
+              .label-container {
                 border: none;
-                padding: 0;
+                margin: 0;
+                page-break-inside: avoid;
+              }
+              @page {
+                size: ${widthInches}in ${heightInches}in;
+                margin: 0;
               }
             }
           </style>
         </head>
         <body>
-          <div class="label">
-            <img src="${dataUrl}" alt="Asset Label for ${equipment.asset_tag}" />
+          <div class="label-container">
+            <img src="${dataUrl}" alt="Asset Label for ${equipment.asset_tag}" class="label-image" />
           </div>
           <script>
             window.onload = function() {
-              window.print();
+              // Small delay to ensure everything is loaded
+              setTimeout(() => {
+                window.print();
+              }, 100);
             };
           </script>
         </body>

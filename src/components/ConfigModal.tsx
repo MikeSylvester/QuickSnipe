@@ -96,7 +96,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     widthMM: 40,
     heightMM: 30,
     qrCodeSize: 0.6,
-    baseFontSize: 12,
+    baseFontSize: 72,
     margin: 10,
     includeName: true,
     includeModel: true,
@@ -104,10 +104,10 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     includeAssetTag: true,
     useVerticalLayout: false,
     // New settings for enhanced label customization
-    nameFontSize: 12,
-    modelFontSize: 12,
-    serialFontSize: 12,
-    assetTagFontSize: 12,
+    nameFontSize: 72,
+    modelFontSize: 72,
+    serialFontSize: 72,
+    assetTagFontSize: 72,
     namePosition: 'right',
     modelPosition: 'right',
     serialPosition: 'right',
@@ -516,15 +516,15 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                         onChange={e => setLabelSettings({...labelSettings, qrCodeSize: Number(e.target.value)})}
                         className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
                         min="0.3"
-                        max="0.8"
+                        max="1.5"
                         step="0.05"
                         style={{
-                          background: `linear-gradient(to right, #f97316 0%, #f97316 ${(labelSettings.qrCodeSize - 0.3) / 0.5 * 100}%, #e5e7eb ${(labelSettings.qrCodeSize - 0.3) / 0.5 * 100}%, #e5e7eb 100%)`
+                          background: `linear-gradient(to right, #f97316 0%, #f97316 ${(labelSettings.qrCodeSize - 0.3) / 1.2 * 100}%, #e5e7eb ${(labelSettings.qrCodeSize - 0.3) / 1.2 * 100}%, #e5e7eb 100%)`
                         }}
                       />
                       <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                         <span>30%</span>
-                        <span>80%</span>
+                        <span>150%</span>
                       </div>
                     </div>
                   </div>
@@ -545,15 +545,15 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                           onChange={e => setLabelSettings({...labelSettings, baseFontSize: Number(e.target.value)})}
                           className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
                           min="8"
-                          max="32"
+                          max="120"
                           step="1"
                           style={{
-                            background: `linear-gradient(to right, #f97316 0%, #f97316 ${(labelSettings.baseFontSize - 8) / 24 * 100}%, #e5e7eb ${(labelSettings.baseFontSize - 8) / 24 * 100}%, #e5e7eb 100%)`
+                            background: `linear-gradient(to right, #f97316 0%, #f97316 ${(labelSettings.baseFontSize - 8) / 112 * 100}%, #e5e7eb ${(labelSettings.baseFontSize - 8) / 112 * 100}%, #e5e7eb 100%)`
                           }}
                         />
                         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                           <span>8px</span>
-                          <span>32px</span>
+                          <span>120px</span>
                         </div>
                       </div>
                     </div>
@@ -570,7 +570,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                           onChange={e => setLabelSettings({...labelSettings, nameFontSize: Number(e.target.value)})}
                           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
                           min="8"
-                          max="40"
+                          max="120"
                           step="1"
                         />
                       </div>
@@ -584,7 +584,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                           onChange={e => setLabelSettings({...labelSettings, modelFontSize: Number(e.target.value)})}
                           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
                           min="8"
-                          max="40"
+                          max="120"
                           step="1"
                         />
                       </div>
@@ -598,7 +598,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                           onChange={e => setLabelSettings({...labelSettings, serialFontSize: Number(e.target.value)})}
                           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
                           min="8"
-                          max="40"
+                          max="120"
                           step="1"
                         />
                       </div>
@@ -612,7 +612,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                           onChange={e => setLabelSettings({...labelSettings, assetTagFontSize: Number(e.target.value)})}
                           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
                           min="8"
-                          max="40"
+                          max="120"
                           step="1"
                         />
                       </div>
@@ -630,15 +630,15 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                         value={labelSettings.margin}
                         onChange={e => setLabelSettings({...labelSettings, margin: Number(e.target.value)})}
                         className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 slider"
-                        min="5"
+                        min="0"
                         max="20"
                         step="1"
                         style={{
-                          background: `linear-gradient(to right, #f97316 0%, #f97316 ${(labelSettings.margin - 5) / 15 * 100}%, #e5e7eb ${(labelSettings.margin - 5) / 15 * 100}%, #e5e7eb 100%)`
+                          background: `linear-gradient(to right, #f97316 0%, #f97316 ${(labelSettings.margin - 0) / 20 * 100}%, #e5e7eb ${(labelSettings.margin - 0) / 20 * 100}%, #e5e7eb 100%)`
                         }}
                       />
                       <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        <span>5px</span>
+                        <span>0px</span>
                         <span>20px</span>
                       </div>
                     </div>
