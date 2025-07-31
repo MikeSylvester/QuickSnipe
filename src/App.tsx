@@ -30,6 +30,8 @@ declare global {
     onUpdateError?: (callback: (event: any, error: string) => void) => void;
     onUpdateDownloadProgress?: (callback: (event: any, progress: any) => void) => void;
     onUpdateDownloaded?: (callback: (event: any, info: any) => void) => void;
+    // App version
+    getAppVersion?: () => Promise<string>;
   };
 }
 }

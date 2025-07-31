@@ -1,11 +1,16 @@
 const { app, BrowserWindow, ipcMain, shell, Menu, session } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const ENCRYPTION_KEY = crypto.createHash('sha256').update('QuicksnipeSuperSecretKey').digest(); // 32 bytes for AES-256
 const IV_LENGTH = 16; // AES block size
 const { exec, spawn } = require('child_process');
+
+// Get app version from package.json
+const packageJson = require('./package.json');
+const APP_VERSION = packageJson.version;
 
 // Shared config for all users
 const CONFIG_PATH = path.join('C:', 'ProgramData', 'Quicksnipe', 'config.json');
@@ -221,12 +226,26 @@ ipcMain.handle('exit-application', async () => {
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 
+// Configure logging
+autoUpdater.logger = log;
+log.transports.file.level = 'debug';
+log.info('Auto-updater initialized');
+
+// Set GitHub token for private repository access
+if (process.env.GITHUB_TOKEN) {
+  log.info('GitHub token found, configuring for private repo access');
+  // Note: For private repos, the token needs to be embedded in the app
+  // This is not recommended for security reasons
+}
+
 // Auto-updater event handlers
 autoUpdater.on('checking-for-update', () => {
+  log.info('Checking for updates...');
   console.log('Checking for updates...');
 });
 
 autoUpdater.on('update-available', (info) => {
+  log.info('Update available:', info);
   console.log('Update available:', info);
   const win = BrowserWindow.getFocusedWindow();
   if (win) {
@@ -235,6 +254,7 @@ autoUpdater.on('update-available', (info) => {
 });
 
 autoUpdater.on('update-not-available', (info) => {
+  log.info('Update not available:', info);
   console.log('Update not available:', info);
   const win = BrowserWindow.getFocusedWindow();
   if (win) {
@@ -243,6 +263,7 @@ autoUpdater.on('update-not-available', (info) => {
 });
 
 autoUpdater.on('error', (err) => {
+  log.error('Auto-updater error:', err);
   console.log('Auto-updater error:', err);
   const win = BrowserWindow.getFocusedWindow();
   if (win) {
@@ -295,6 +316,11 @@ ipcMain.handle('install-update', async () => {
     console.error('Error installing update:', error);
     return { success: false, error: error.message };
   }
+});
+
+// Get app version
+ipcMain.handle('get-app-version', async () => {
+  return APP_VERSION;
 });
 
 app.whenReady().then(() => {

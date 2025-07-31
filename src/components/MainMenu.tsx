@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Package, Search, Users, Settings, Smartphone, Plus, Moon, Sun, X, BarChart3 } from 'lucide-react';
 import { AppMode } from '../App';
 import { UpdateManager } from './UpdateManager';
@@ -24,6 +24,22 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   onToggleKioskMode,
   onExitApplication
 }) => {
+  const [appVersion, setAppVersion] = useState('1.0.2');
+
+  // Get app version
+  useEffect(() => {
+    const getVersion = async () => {
+      if (typeof window !== 'undefined' && (window as any).electronAPI?.getAppVersion) {
+        try {
+          const version = await (window as any).electronAPI.getAppVersion();
+          setAppVersion(version);
+        } catch (error) {
+          console.error('Failed to get app version:', error);
+        }
+      }
+    };
+    getVersion();
+  }, []);
   const menuItems = [
     {
       id: 'storeroom' as AppMode,
@@ -79,6 +95,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             <h1 className="text-5xl font-bold text-gray-900 dark:text-white">Quicksnipe</h1>
           </div>
           <p className="text-xl text-gray-600 dark:text-gray-300">Tablet-First Inventory Management</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Version {appVersion}</p>
         </div>
 
         {/* Configuration Warning */}

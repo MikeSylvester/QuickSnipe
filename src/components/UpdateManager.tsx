@@ -232,7 +232,9 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
               {updateInfo.releaseNotes && (
                 <div className="text-sm text-gray-600 dark:text-gray-300">
                   <strong>Release Notes:</strong>
-                  <p className="mt-1">{updateInfo.releaseNotes}</p>
+                  <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg max-h-32 overflow-y-auto">
+                    <pre className="text-xs whitespace-pre-wrap">{updateInfo.releaseNotes}</pre>
+                  </div>
                 </div>
               )}
             </div>

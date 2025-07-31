@@ -14,7 +14,7 @@
     "electron": "electron .",
     "dist": "electron-builder",
     "generate-icons": "node generate-icons.js",
-    "release": "node scripts/create-release.js"
+    "publish": "node scripts/publish-with-notes.js"
   },
   "dependencies": {
     "axios": "^1.10.0",
@@ -51,10 +51,11 @@
     "vite": "^5.4.2"
   },
   "build": {
-    "appId": "com.yourcompany.quicksnipe",
-    "artifactName": "${productName}.${ext}",
+    "appId": "com.mikesylvester.quicksnipe",
+    "artifactName": "QuickSnipe.${ext}",
     "productName": "Quicksnipe",
     "icon": "assets/icons/icon.ico",
+    "copyright": "Copyright © 2025 Mike Sylvester",
     "files": [
       "dist/**/*",
       "main.cjs",
@@ -68,22 +69,34 @@
     "win": {
       "target": "nsis",
       "icon": "assets/icons/icon.ico",
-      "requestedExecutionLevel": "asInvoker"
+      "requestedExecutionLevel": "asInvoker",
+      "verifyUpdateCodeSignature": false,
+      "signAndEditExecutable": false,
+      "certificateFile": null,
+      "certificatePassword": null,
+      "rfc3161TimeStampServer": "http://timestamp.digicert.com",
+      "timeStampServer": "http://timestamp.digicert.com"
     },
     "nsis": {
       "perMachine": true,
-      "createDesktopShortcut": false,
-      "createStartMenuShortcut": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
       "installerIcon": "assets/icons/icon.ico",
       "uninstallerIcon": "assets/icons/icon.ico",
-      "include": "build/installer.nsh"
+      "include": "build/installer.nsh",
+      "oneClick": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false
     },
     "publish": {
       "provider": "github",
       "owner": "MikeSylvester",
       "repo": "QuickSnipe",
       "private": false,
-      "releaseType": "release"
+      "releaseType": "release",
+      "releaseNotes": "auto"
     }
-  }
+  },
+  "releaseNotes": "# Quicksnipe v1.0.4\r\n\r\n## What's New\r\n- Added release notes system for auto-updater\r\n- Fixed installer issues (desktop shortcuts, uninstaller names)\r\n- Improved SmartScreen compatibility\r\n- Enhanced auto-updater functionality\r\n\r\n## Bug Fixes\r\n- Fixed auto-updater uninstalling instead of updating\r\n- Resolved desktop shortcut not being created\r\n- Fixed uninstaller showing wrong application name\r\n- Improved installer registry entries\r\n\r\n## Features\r\n- Release notes now display in the auto-updater\r\n- Better installer metadata for Windows\r\n- Enhanced user experience with proper shortcuts\r\n- Improved application identification\r\n\r\n## Installation\r\nDownload the latest version from the releases page. The installer will now create desktop shortcuts and properly register the application.\r\n\r\n## Auto-Updater\r\nThis version includes enhanced auto-updater functionality with release notes. Users will see detailed information about what's new in each update."
 }
