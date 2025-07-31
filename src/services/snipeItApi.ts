@@ -517,6 +517,51 @@ class SnipeItApiService {
       return [];
     }
   }
+
+  // Get all equipment for reports
+  async getAllEquipment(): Promise<Equipment[]> {
+    try {
+      if (!this.apiToken) {
+        throw new Error('API configuration not set');
+      }
+
+      const response = await axios.get(
+        `${this.baseUrl}/api/v1/hardware`,
+        { 
+          headers: this.getHeaders(),
+          params: { limit: 3000 }, // Get more equipment for reports
+          timeout: 15000
+        }
+      );
+
+      return response.data.rows || [];
+    } catch (error) {
+      console.error('Error fetching all equipment:', error);
+      return [];
+    }
+  }
+
+  // Get manufacturers for reports
+  async getManufacturers(): Promise<Array<{ id: number; name: string }>> {
+    try {
+      if (!this.apiToken) {
+        throw new Error('API configuration not set');
+      }
+
+      const response = await axios.get(
+        `${this.baseUrl}/api/v1/manufacturers`,
+        { 
+          headers: this.getHeaders(),
+          timeout: 10000
+        }
+      );
+
+      return response.data.rows || [];
+    } catch (error) {
+      console.error('Error fetching manufacturers:', error);
+      return [];
+    }
+  }
 }
 
 export const snipeItApi = new SnipeItApiService();

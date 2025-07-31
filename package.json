@@ -16,10 +16,13 @@
   },
   "dependencies": {
     "axios": "^1.10.0",
+    "chart.js": "^4.5.0",
+    "electron-updater": "^6.6.2",
     "lucide-react": "^0.344.0",
     "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
@@ -70,6 +73,13 @@
       "installerIcon": "assets/icons/icon.ico",
       "uninstallerIcon": "assets/icons/icon.ico",
       "include": "build/installer.nsh"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "MikeSylvester",
+      "repo": "QuickSnipe",
+      "private": false,
+      "releaseType": "release"
     }
   }
 }

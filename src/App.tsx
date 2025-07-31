@@ -4,32 +4,44 @@ import { StoreroomSorter } from './components/StoreroomSorter';
 import { QuickInventory } from './components/QuickInventory';
 import { CheckInOutKiosk } from './components/CheckInOutKiosk';
 import { ConfigModal } from './components/ConfigModal';
+import { Reports } from './components/Reports';
+import { AddDeviceForm } from './components/AddDeviceForm';
 import { snipeItApi } from './services/snipeItApi';
 import { Toast } from './components/Toast';
 
 // Type declaration for window.electronAPI
 declare global {
   interface Window {
-    electronAPI?: {
-      openExternal: (url: string) => void;
-      getConfig?: () => Promise<any>;
-      setConfig?: (config: any) => Promise<void>;
-      searchAD: (pattern: string) => Promise<any>;
-      toggleKioskMode?: () => Promise<void>;
-      exitApplication?: () => Promise<void>;
-      exitKioskMode?: () => Promise<void>;
-    };
-  }
+  electronAPI?: {
+    openExternal: (url: string) => void;
+    getConfig?: () => Promise<any>;
+    setConfig?: (config: any) => Promise<void>;
+    searchAD: (pattern: string) => Promise<any>;
+    toggleKioskMode?: () => Promise<void>;
+    exitApplication?: () => Promise<void>;
+    exitKioskMode?: () => Promise<void>;
+    // Auto-updater functions
+    checkForUpdates?: () => Promise<any>;
+    downloadUpdate?: () => Promise<any>;
+    installUpdate?: () => Promise<any>;
+    // Auto-updater event listeners
+    onUpdateAvailable?: (callback: (event: any, info: any) => void) => void;
+    onUpdateNotAvailable?: (callback: (event: any, info: any) => void) => void;
+    onUpdateError?: (callback: (event: any, error: string) => void) => void;
+    onUpdateDownloadProgress?: (callback: (event: any, progress: any) => void) => void;
+    onUpdateDownloaded?: (callback: (event: any, info: any) => void) => void;
+  };
+}
 }
 
-export type AppMode = 'menu' | 'storeroom' | 'inventory' | 'kiosk' | 'config';
+export type AppMode = 'menu' | 'storeroom' | 'inventory' | 'kiosk' | 'config' | 'reports' | 'add-device';
 
 const isElectron = typeof window !== 'undefined' && (window as any).electronAPI;
 
 function App() {
   const [currentMode, setCurrentMode] = useState<AppMode>('menu');
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
-  const [kioskMode, setKioskMode] = useState(false);
+  const [kioskMode, setKioskMode] = useState(true);
   const [config, setConfig] = useState({
     baseUrl: '',
     apiToken: '',
@@ -362,6 +374,29 @@ function App() {
             currentConfig={config}
             darkMode={darkMode}
           />
+        );
+      case 'reports':
+        return (
+          <Reports 
+            onBack={() => setCurrentMode('menu')}
+            config={config}
+            showToast={showToast}
+          />
+        );
+      case 'add-device':
+        return (
+          <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8">
+            <div className="max-w-4xl mx-auto">
+              <AddDeviceForm
+                onSuccess={() => {
+                  setCurrentMode('menu');
+                  showToast('Device added successfully!', 'success');
+                }}
+                onCancel={() => setCurrentMode('menu')}
+                showToast={showToast}
+              />
+            </div>
+          </div>
         );
       default:
         return (

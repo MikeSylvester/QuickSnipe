@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, shell, Menu, session } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -42,8 +43,8 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    fullscreen: false,
-    kiosk: false,
+    fullscreen: true,
+    kiosk: true,
     autoHideMenuBar: true,
     icon: iconExists ? iconPath : undefined,
     webPreferences: {
@@ -196,10 +197,9 @@ ipcMain.handle('toggle-kiosk-mode', async () => {
   if (win) {
     if (win.isFullScreen()) {
       win.setFullScreen(false);
-      win.setKioskMode(false);
+      win.maximize();
     } else {
       win.setFullScreen(true);
-      win.setKioskMode(true);
     }
   }
 });
@@ -207,14 +207,94 @@ ipcMain.handle('toggle-kiosk-mode', async () => {
 // Handle escape key to exit kiosk mode
 ipcMain.handle('exit-kiosk-mode', async () => {
   const win = BrowserWindow.getFocusedWindow();
-  if (win && (win.isFullScreen() || win.isKioskMode())) {
+  if (win && win.isFullScreen()) {
     win.setFullScreen(false);
-    win.setKioskMode(false);
+    win.maximize();
   }
 });
 
 ipcMain.handle('exit-application', async () => {
   app.quit();
+});
+
+// Auto-updater configuration
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+
+// Auto-updater event handlers
+autoUpdater.on('checking-for-update', () => {
+  console.log('Checking for updates...');
+});
+
+autoUpdater.on('update-available', (info) => {
+  console.log('Update available:', info);
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    win.webContents.send('update-available', info);
+  }
+});
+
+autoUpdater.on('update-not-available', (info) => {
+  console.log('Update not available:', info);
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    win.webContents.send('update-not-available', info);
+  }
+});
+
+autoUpdater.on('error', (err) => {
+  console.log('Auto-updater error:', err);
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    win.webContents.send('update-error', err.message);
+  }
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  console.log('Download progress:', progressObj);
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    win.webContents.send('update-download-progress', progressObj);
+  }
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  console.log('Update downloaded:', info);
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    win.webContents.send('update-downloaded', info);
+  }
+});
+
+// IPC handlers for auto-updater
+ipcMain.handle('check-for-updates', async () => {
+  try {
+    await autoUpdater.checkForUpdates();
+    return { success: true };
+  } catch (error) {
+    console.error('Error checking for updates:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('download-update', async () => {
+  try {
+    await autoUpdater.downloadUpdate();
+    return { success: true };
+  } catch (error) {
+    console.error('Error downloading update:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('install-update', async () => {
+  try {
+    autoUpdater.quitAndInstall();
+    return { success: true };
+  } catch (error) {
+    console.error('Error installing update:', error);
+    return { success: false, error: error.message };
+  }
 });
 
 app.whenReady().then(() => {
@@ -233,6 +313,16 @@ app.whenReady().then(() => {
   }
   
   createWindow();
+  
+  // Check for updates on startup (after a short delay)
+  setTimeout(() => {
+    if (process.env.NODE_ENV !== 'development') {
+      console.log('Checking for updates on startup...');
+      autoUpdater.checkForUpdates().catch(err => {
+        console.log('Startup update check failed:', err.message);
+      });
+    }
+  }, 3000); // Wait 3 seconds after app starts
 });
 
 app.on('window-all-closed', () => {

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Package, Search, Users, Settings, Smartphone, Plus, Moon, Sun, X } from 'lucide-react';
+import React from 'react';
+import { Package, Search, Users, Settings, Smartphone, Plus, Moon, Sun, X, BarChart3 } from 'lucide-react';
 import { AppMode } from '../App';
-import { AddDeviceForm } from './AddDeviceForm';
+import { UpdateManager } from './UpdateManager';
 
 interface MainMenuProps {
   onModeSelect: (mode: AppMode) => void;
@@ -24,8 +24,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   onToggleKioskMode,
   onExitApplication
 }) => {
-  const [showAddDevice, setShowAddDevice] = useState(false);
-
   const menuItems = [
     {
       id: 'storeroom' as AppMode,
@@ -50,26 +48,26 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       icon: Users,
       color: 'bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600',
       disabled: !isConfigured
+    },
+    {
+      id: 'add-device' as AppMode,
+      title: 'Add New Device',
+      description: 'Create new asset entries',
+      icon: Plus,
+      color: 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600',
+      disabled: !isConfigured
+    },
+    {
+      id: 'reports' as AppMode,
+      title: 'Reports & Analytics',
+      description: 'Interactive charts and insights',
+      icon: BarChart3,
+      color: 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600',
+      disabled: !isConfigured
     }
   ];
 
-  const handleAddDeviceSuccess = () => {
-    setShowAddDevice(false);
-  };
 
-  if (showAddDevice) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8">
-        <div className="max-w-4xl mx-auto">
-          <AddDeviceForm
-            onSuccess={handleAddDeviceSuccess}
-            onCancel={() => setShowAddDevice(false)}
-            showToast={() => {}}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 transition-colors">
@@ -128,30 +126,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             );
           })}
 
-          {/* Add Device Button */}
-          <button
-            onClick={() => !isConfigured ? null : setShowAddDevice(true)}
-            disabled={!isConfigured}
-            className={`
-              relative p-8 rounded-3xl text-white transition-all duration-300 transform
-              ${!isConfigured 
-                ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed opacity-50' 
-                : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl'
-              }
-            `}
-          >
-            <div className="text-center">
-              <Plus className="w-16 h-16 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Add Device</h2>
-              <p className="text-lg opacity-90">Create new asset</p>
-            </div>
-            
-            {!isConfigured && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded-3xl">
-                <span className="text-white font-semibold">Setup Required</span>
-              </div>
-            )}
-          </button>
         </div>
 
         {/* Bottom Controls */}
@@ -172,6 +146,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               {darkMode ? <Sun className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" /> : <Moon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />}
               {darkMode ? 'Light Mode' : 'Dark Mode'}
             </button>
+
+            <UpdateManager darkMode={darkMode} />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
