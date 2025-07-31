@@ -8,10 +8,6 @@ const ENCRYPTION_KEY = crypto.createHash('sha256').update('QuicksnipeSuperSecret
 const IV_LENGTH = 16; // AES block size
 const { exec, spawn } = require('child_process');
 
-// Get app version from package.json
-const packageJson = require('./package.json');
-const APP_VERSION = packageJson.version;
-
 // Shared config for all users
 const CONFIG_PATH = path.join('C:', 'ProgramData', 'Quicksnipe', 'config.json');
 const configDir = path.dirname(CONFIG_PATH);
@@ -316,11 +312,6 @@ ipcMain.handle('install-update', async () => {
     console.error('Error installing update:', error);
     return { success: false, error: error.message };
   }
-});
-
-// Get app version
-ipcMain.handle('get-app-version', async () => {
-  return APP_VERSION;
 });
 
 app.whenReady().then(() => {

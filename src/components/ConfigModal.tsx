@@ -76,24 +76,8 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
   currentConfig,
   darkMode = false
 }) => {
-  const [appVersion, setAppVersion] = useState('1.0.2');
   const [baseUrl, setBaseUrl] = useState(currentConfig.baseUrl);
   const [apiToken, setApiToken] = useState(currentConfig.apiToken);
-
-  // Get app version
-  useEffect(() => {
-    const getVersion = async () => {
-      if (typeof window !== 'undefined' && (window as any).electronAPI?.getAppVersion) {
-        try {
-          const version = await (window as any).electronAPI.getAppVersion();
-          setAppVersion(version);
-        } catch (error) {
-          console.error('Failed to get app version:', error);
-        }
-      }
-    };
-    getVersion();
-  }, []);
   const [locations, setLocations] = useState<Array<{ id: number; name: string }>>([]);
   const [locationId, setLocationId] = useState(currentConfig.locationId || '');
   const [locationName, setLocationName] = useState(currentConfig.locationName || '');
@@ -290,22 +274,19 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between p-6">
-            <button
-              onClick={onBack}
-              className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6 mr-2" />
-              <span className="text-lg">Back to Menu</span>
-            </button>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {currentConfig.baseUrl && currentConfig.apiToken ? 'Configuration' : 'Initial Setup'}
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Version {appVersion}</p>
-            </div>
-            <div className="w-24"></div> {/* Spacer for centering */}
-          </div>
+        <div className="flex items-center justify-between p-6">
+          <button
+            onClick={onBack}
+            className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 mr-2" />
+            <span className="text-lg">Back to Menu</span>
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {currentConfig.baseUrl && currentConfig.apiToken ? 'Configuration' : 'Initial Setup'}
+          </h1>
+          <div className="w-24"></div> {/* Spacer for centering */}
+        </div>
       </div>
 
       {/* Content */}

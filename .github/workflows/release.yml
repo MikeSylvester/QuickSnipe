@@ -9,8 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       
       - uses: actions/setup-node@v4
         with:
@@ -23,38 +21,6 @@ jobs:
       
       - run: npm run dist
       
-      # Extract release notes from CHANGELOG.md
-      - name: Extract Release Notes
-        id: extract_release_notes
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "Extracting release notes for version: $VERSION"
-          
-          # Extract the changelog section for this version
-          if grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            # Extract from the version header to the next version header or end of file
-            RELEASE_NOTES=$(awk "/^## \\[$VERSION\\]/{p=1;next}/^## \\[/{p=0}p" CHANGELOG.md | sed '1d' | sed '/^$/d')
-            echo "release_notes<<EOF" >> $GITHUB_OUTPUT
-            echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "No release notes found for version $VERSION"
-            echo "release_notes=Update available with bug fixes and improvements." >> $GITHUB_OUTPUT
-          fi
-      
-      # Create GitHub release with extracted notes
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dist/*.exe
-          body: ${{ steps.extract_release_notes.outputs.release_notes }}
-          draft: false
-          prerelease: false
-          generate_release_notes: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # Publish to electron-builder
       - uses: electron-userland/electron-builder-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
