@@ -3,7 +3,7 @@
   "productName": "Quicksnipe",
   "description": "A Snipe-IT QR Scanner",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "main.cjs",
   "scripts": {
     "dev": "vite",

@@ -27,6 +27,7 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showNoUpdateMessage, setShowNoUpdateMessage] = useState(false);
 
   const isElectron = typeof window !== 'undefined' && (window as any).electronAPI;
 
@@ -45,6 +46,9 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
       setUpdateAvailable(false);
       setUpdateInfo(null);
       setError(null);
+      setShowNoUpdateMessage(true);
+      // Hide the message after 3 seconds
+      setTimeout(() => setShowNoUpdateMessage(false), 3000);
     };
 
     const handleUpdateError = (event: any, errorMessage: string) => {
@@ -82,14 +86,28 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
 
     setIsChecking(true);
     setError(null);
+    setShowNoUpdateMessage(false);
     
     try {
       const result = await (window as any).electronAPI.checkForUpdates();
       if (!result.success) {
         setError(result.error || 'Failed to check for updates');
+        // Clear error after 5 seconds
+        setTimeout(() => setError(null), 5000);
+      } else {
+        // If the check was successful but no update event was fired, 
+        // it means no updates are available
+        setTimeout(() => {
+          if (!updateAvailable && !error) {
+            setShowNoUpdateMessage(true);
+            setTimeout(() => setShowNoUpdateMessage(false), 3000);
+          }
+        }, 1000);
       }
     } catch (err) {
       setError('Failed to check for updates');
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
     } finally {
       setIsChecking(false);
     }
@@ -158,6 +176,38 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
         )}
         {isChecking ? 'Checking...' : 'Check for Updates'}
       </button>
+
+      {/* No Update Available Message */}
+      {showNoUpdateMessage && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className={`px-4 py-3 rounded-lg shadow-lg border ${
+            darkMode 
+              ? 'bg-green-900/90 border-green-700 text-green-200' 
+              : 'bg-green-100 border-green-300 text-green-800'
+          }`}>
+            <div className="flex items-center">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              <span className="text-sm font-medium">You're up to date!</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className={`px-4 py-3 rounded-lg shadow-lg border ${
+            darkMode 
+              ? 'bg-red-900/90 border-red-700 text-red-200' 
+              : 'bg-red-100 border-red-300 text-red-800'
+          }`}>
+            <div className="flex items-center">
+              <AlertCircle className="w-4 h-4 mr-2" />
+              <span className="text-sm font-medium">{error}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Update Modal */}
       {showUpdateModal && updateAvailable && updateInfo && (
