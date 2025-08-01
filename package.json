@@ -3,7 +3,7 @@
   "productName": "Quicksnipe",
   "description": "A Snipe-IT QR Scanner",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.7",
   "author": "Mike Sylvester",
   "main": "main.cjs",
   "scripts": {
@@ -13,7 +13,9 @@
     "preview": "vite preview",
     "electron": "electron .",
     "dist": "electron-builder",
-    "generate-icons": "node generate-icons.js"
+    "generate-icons": "node generate-icons.js",
+    "release": "node scripts/create-release.js && npx electron-builder --publish=always && echo 'To add release notes, run: gh release edit v1.0.7 --notes-file RELEASE_NOTES_CURRENT.md'",
+    "release-with-notes": "node scripts/create-release.js && npx electron-builder && node scripts/create-github-release.js"
   },
   "dependencies": {
     "axios": "^1.10.0",

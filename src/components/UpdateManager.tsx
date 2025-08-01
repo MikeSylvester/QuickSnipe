@@ -28,6 +28,7 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
   const [error, setError] = useState<string | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showNoUpdateMessage, setShowNoUpdateMessage] = useState(false);
+  const [hasCheckedOnStartup, setHasCheckedOnStartup] = useState(false);
 
   const isElectron = typeof window !== 'undefined' && (window as any).electronAPI;
 
@@ -46,9 +47,11 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
       setUpdateAvailable(false);
       setUpdateInfo(null);
       setError(null);
-      setShowNoUpdateMessage(true);
-      // Hide the message after 3 seconds
-      setTimeout(() => setShowNoUpdateMessage(false), 3000);
+      if (hasCheckedOnStartup) {
+        setShowNoUpdateMessage(true);
+        // Hide the message after 3 seconds
+        setTimeout(() => setShowNoUpdateMessage(false), 3000);
+      }
     };
 
     const handleUpdateError = (event: any, errorMessage: string) => {
@@ -79,7 +82,27 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
       // Note: In a real app, you'd want to remove these listeners
       // but electron-updater doesn't provide a removeListener method
     };
-  }, [isElectron]);
+  }, [isElectron, hasCheckedOnStartup]);
+
+  // Check for updates on startup
+  useEffect(() => {
+    if (!isElectron || hasCheckedOnStartup) return;
+
+    const checkForUpdatesOnStartup = async () => {
+      try {
+        console.log('Checking for updates on startup...');
+        await (window as any).electronAPI.checkForUpdates();
+        setHasCheckedOnStartup(true);
+      } catch (error) {
+        console.error('Startup update check failed:', error);
+        setHasCheckedOnStartup(true);
+      }
+    };
+
+    // Wait a bit for the app to fully load
+    const timer = setTimeout(checkForUpdatesOnStartup, 2000);
+    return () => clearTimeout(timer);
+  }, [isElectron, hasCheckedOnStartup]);
 
   const checkForUpdates = async () => {
     if (!isElectron) return;
@@ -160,22 +183,38 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
   return (
     <>
       {/* Update Check Button */}
-      <button
-        onClick={checkForUpdates}
-        disabled={isChecking}
-        className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-          isChecking
-            ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'
-        }`}
-      >
-        {isChecking ? (
-          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-        ) : (
-          <Download className="w-4 h-4 mr-2" />
+      <div className="relative">
+        <button
+          onClick={updateAvailable ? () => setShowUpdateModal(true) : checkForUpdates}
+          disabled={isChecking}
+          className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            isChecking
+              ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+              : updateAvailable
+              ? 'bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white'
+              : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white'
+          }`}
+        >
+          {isChecking ? (
+            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+          ) : updateAvailable ? (
+            <Download className="w-4 h-4 mr-2" />
+          ) : (
+            <Download className="w-4 h-4 mr-2" />
+          )}
+          {isChecking 
+            ? 'Checking...' 
+            : updateAvailable 
+            ? 'Start Update' 
+            : 'Check for Updates'
+          }
+        </button>
+        
+        {/* Update Available Badge */}
+        {updateAvailable && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
         )}
-        {isChecking ? 'Checking...' : 'Check for Updates'}
-      </button>
+      </div>
 
       {/* No Update Available Message */}
       {showNoUpdateMessage && (
