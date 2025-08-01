@@ -75,7 +75,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6">
-            <Smartphone className="w-16 h-16 text-orange-500 mr-4" />
+            <Package className="w-16 h-16 text-orange-500 mr-4" />
             <h1 className="text-5xl font-bold text-gray-900 dark:text-white">Quicksnipe</h1>
           </div>
                           <p className="text-xl text-gray-600 dark:text-gray-300">Cayuga Centers Inventory Management</p>
