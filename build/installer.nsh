@@ -1,26 +1,26 @@
 !macro customInstall
+  ; This macro runs AFTER the installer has copied all the files.
+  ; We manually create the shortcuts here to ensure the icon is applied correctly.
+  
+  SetOutPath $INSTDIR
+  
+  ; Create the Start Menu directory
+  CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
+  
   ; Copy the icon file to the installation directory
   SetOutPath "$INSTDIR"
   File "${BUILD_RESOURCES_DIR}\icons\icon.ico"
-  
+
+
   ; Create desktop shortcut with explicit icon
   CreateShortCut "$DESKTOP\Quicksnipe.lnk" "$INSTDIR\Quicksnipe.exe" "" "$INSTDIR\icon.ico" 0
-  
-  ; Create start menu shortcut with explicit icon
-  CreateDirectory "$SMPROGRAMS\Quicksnipe"
-  CreateShortCut "$SMPROGRAMS\Quicksnipe\Quicksnipe.lnk" "$INSTDIR\Quicksnipe.exe" "" "$INSTDIR\icon.ico" 0
-  CreateShortCut "$SMPROGRAMS\Quicksnipe\Uninstall Quicksnipe.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\icon.ico" 0
 !macroend
 
 !macro customUnInstall
-  ; Remove desktop shortcut
-  Delete "$DESKTOP\Quicksnipe.lnk"
+  ; This macro runs when the uninstaller starts.
+  ; We manually delete the shortcuts we created.
   
-  ; Remove start menu shortcuts
-  Delete "$SMPROGRAMS\Quicksnipe\Quicksnipe.lnk"
-  Delete "$SMPROGRAMS\Quicksnipe\Uninstall Quicksnipe.lnk"
-  RMDir "$SMPROGRAMS\Quicksnipe"
-  
-  ; Remove icon file
-  Delete "$INSTDIR\icon.ico"
+  Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\*.lnk"
+  RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
 !macroend 

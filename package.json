@@ -1,9 +1,10 @@
 {
   "name": "quicksnipe",
   "productName": "Quicksnipe",
+  "icon": "assets/icons/icon.ico",
   "description": "A Snipe-IT QR Scanner",
   "private": true,
-  "version": "1.0.14",
+  "version": "1.0.17",
   "author": "Mike Sylvester",
   "main": "main.cjs",
   "scripts": {
@@ -53,35 +54,31 @@
   },
   "build": {
     "appId": "com.mikesylvester.quicksnipe",
-    "artifactName": "${productName}.${ext}",
     "productName": "Quicksnipe",
-    "icon": "assets/icons/icon.ico",
+    "directories": {
+      "buildResources": "assets"
+    },
     "files": [
       "dist/**/*",
       "main.cjs",
       "preload.cjs",
-      "package.json",
-      "assets/**/*"
+      "package.json"
     ],
-    "directories": {
-      "buildResources": "assets"
-    },
     "win": {
       "target": "nsis",
-      "icon": "assets/icons/icon.ico",
-      "requestedExecutionLevel": "asInvoker"
+      "icon": "assets/icons/icon.ico"
     },
     "nsis": {
       "perMachine": true,
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "allowElevation": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Quicksnipe",
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false,
       "installerIcon": "assets/icons/icon.ico",
       "uninstallerIcon": "assets/icons/icon.ico",
-      "include": "build/installer.nsh"
+      "include": "build/installer.nsh",
+      "deleteAppDataOnUninstall": true
     },
     "publish": {
       "provider": "github",

@@ -221,6 +221,8 @@ ipcMain.handle('exit-application', async () => {
 // Auto-updater configuration
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.allowPrerelease = false;
+autoUpdater.allowDowngrade = false;
 
 // Configure logging
 autoUpdater.logger = log;
@@ -306,7 +308,8 @@ ipcMain.handle('download-update', async () => {
 
 ipcMain.handle('install-update', async () => {
   try {
-    autoUpdater.quitAndInstall();
+    // Force quit and install with proper error handling
+    autoUpdater.quitAndInstall(false, true);
     return { success: true };
   } catch (error) {
     console.error('Error installing update:', error);
