@@ -1,5 +1,9 @@
 # Release Notes
 
+
+## Version 1.0.8
+-Added script that auto updates Git
+
 ## Version 1.0.7
 - Added auto-updater with startup check
 - Improved update button UI with status indicators

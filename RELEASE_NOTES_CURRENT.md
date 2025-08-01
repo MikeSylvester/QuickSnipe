@@ -1,8 +1,3 @@
-## Version 1.0.7
+## Version 1.0.8
 
-### New Features
-• Add auto-updater with improved feedback and logging
-
-### Improvements
-• 1.0.3
-
+• Release notes not found for this version

@@ -13,13 +13,24 @@ if (!GITHUB_TOKEN) {
   process.exit(1);
 }
 
-// Read release notes
+// Read release notes from RELEASE_NOTES.md
 function readReleaseNotes() {
   try {
-    return fs.readFileSync('RELEASE_NOTES_CURRENT.md', 'utf8');
+    const allNotes = fs.readFileSync('RELEASE_NOTES.md', 'utf8');
+    
+    // Find the section for the current version
+    const versionPattern = new RegExp(`## Version ${VERSION}\\s*\\n([\\s\\S]*?)(?=\\n## Version|$)`, 'i');
+    const match = allNotes.match(versionPattern);
+    
+    if (match) {
+      return `## Version ${VERSION}\n${match[1].trim()}`;
+    } else {
+      console.warn(`⚠️  No release notes found for version ${VERSION} in RELEASE_NOTES.md`);
+      return `## Version ${VERSION}\n\n• Release notes not found for this version`;
+    }
   } catch (error) {
-    console.error('❌ Could not read RELEASE_NOTES_CURRENT.md');
-    return `## Version ${VERSION}\n\n• Auto-generated release notes`;
+    console.error('❌ Could not read RELEASE_NOTES.md');
+    return `## Version ${VERSION}\n\n• Release notes file not found`;
   }
 }
 

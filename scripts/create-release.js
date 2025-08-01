@@ -9,63 +9,35 @@ const currentVersion = packageJson.version;
 // Get the previous version (you can modify this logic)
 const previousVersion = 'v1.0.6'; // This should be dynamic
 
-// Generate release notes from git commits
-function generateReleaseNotes() {
+// Read release notes from RELEASE_NOTES.md
+function readReleaseNotes() {
   try {
-    // Get commits since the last tag
-    const commits = execSync(`git log --oneline ${previousVersion}..HEAD`, { encoding: 'utf8' });
+    const allNotes = fs.readFileSync('RELEASE_NOTES.md', 'utf8');
     
-    // Parse commits and format them
-    const commitLines = commits.trim().split('\n').filter(line => line.trim());
+    // Find the section for the current version
+    const versionPattern = new RegExp(`## Version ${currentVersion}\\s*\\n([\\s\\S]*?)(?=\\n## Version|$)`, 'i');
+    const match = allNotes.match(versionPattern);
     
-    let releaseNotes = `## Version ${currentVersion}\n\n`;
-    
-    // Group commits by type
-    const features = [];
-    const fixes = [];
-    const improvements = [];
-    
-    commitLines.forEach(commit => {
-      const message = commit.split(' ').slice(1).join(' ');
-      if (message.toLowerCase().includes('fix') || message.toLowerCase().includes('bug')) {
-        fixes.push(`• ${message}`);
-      } else if (message.toLowerCase().includes('add') || message.toLowerCase().includes('new')) {
-        features.push(`• ${message}`);
-      } else {
-        improvements.push(`• ${message}`);
-      }
-    });
-    
-    if (features.length > 0) {
-      releaseNotes += '### New Features\n';
-      releaseNotes += features.join('\n') + '\n\n';
+    if (match) {
+      return `## Version ${currentVersion}\n${match[1].trim()}`;
+    } else {
+      console.warn(`⚠️  No release notes found for version ${currentVersion} in RELEASE_NOTES.md`);
+      return `## Version ${currentVersion}\n\n• Release notes not found for this version`;
     }
-    
-    if (fixes.length > 0) {
-      releaseNotes += '### Bug Fixes\n';
-      releaseNotes += fixes.join('\n') + '\n\n';
-    }
-    
-    if (improvements.length > 0) {
-      releaseNotes += '### Improvements\n';
-      releaseNotes += improvements.join('\n') + '\n\n';
-    }
-    
-    return releaseNotes;
   } catch (error) {
-    console.error('Error generating release notes:', error);
-    return `## Version ${currentVersion}\n\n• Auto-generated release notes`;
+    console.error('❌ Could not read RELEASE_NOTES.md');
+    return `## Version ${currentVersion}\n\n• Release notes file not found`;
   }
 }
 
 // Create a release notes file for GitHub
 function createReleaseNotesFile() {
-  const releaseNotes = generateReleaseNotes();
+  const releaseNotes = readReleaseNotes();
   
   // Write release notes to a file
   fs.writeFileSync('RELEASE_NOTES_CURRENT.md', releaseNotes);
   
-  console.log('Release notes generated:');
+  console.log('Release notes read from RELEASE_NOTES.md:');
   console.log(releaseNotes);
   console.log('\nRelease notes saved to RELEASE_NOTES_CURRENT.md');
   console.log('\nAfter building, you can create a GitHub release with these notes using:');
