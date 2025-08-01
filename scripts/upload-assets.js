@@ -5,7 +5,10 @@ const https = require('https');
 const GITHUB_TOKEN = process.env.GH_TOKEN;
 const OWNER = 'MikeSylvester';
 const REPO = 'QuickSnipe';
-const VERSION = '1.0.7';
+
+// Get the current version from package.json
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const VERSION = packageJson.version;
 
 if (!GITHUB_TOKEN) {
   console.error('❌ GH_TOKEN environment variable is not set');
@@ -115,7 +118,8 @@ async function uploadAssets() {
     
     const files = [
       { path: 'dist/Quicksnipe.exe', name: 'Quicksnipe.exe' },
-      { path: 'dist/Quicksnipe.exe.blockmap', name: 'Quicksnipe.exe.blockmap' }
+      { path: 'dist/Quicksnipe.exe.blockmap', name: 'Quicksnipe.exe.blockmap' },
+      { path: 'dist/latest.yml', name: 'latest.yml' }
     ];
 
     for (const file of files) {

@@ -8,20 +8,30 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
       
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
       
-      - run: npm run build
+      - name: Build application
+        run: npm run build
       
-      - run: npm run dist
+      - name: Generate release notes
+        run: node scripts/create-release.js
       
-      - uses: electron-userland/electron-builder-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish: always 
+      - name: Build and publish release
+        run: npx electron-builder --publish=always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create GitHub release with notes
+        run: node scripts/create-github-release.js
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

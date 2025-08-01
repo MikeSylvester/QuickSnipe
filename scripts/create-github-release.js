@@ -86,6 +86,57 @@ function makeGitHubRequest(path, method = 'GET', data = null) {
   });
 }
 
+// Upload file to GitHub releases
+function uploadAsset(uploadUrl, filePath, fileName) {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(filePath)) {
+      reject(new Error(`File not found: ${filePath}`));
+      return;
+    }
+
+    const fileContent = fs.readFileSync(filePath);
+    const url = uploadUrl.replace('{?name,label}', `?name=${fileName}`);
+
+    const options = {
+      hostname: 'uploads.github.com',
+      path: url.replace('https://uploads.github.com', ''),
+      method: 'POST',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'User-Agent': 'QuickSnipe-Release-Script',
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': fileContent.length
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => {
+        body += chunk;
+      });
+      res.on('end', () => {
+        try {
+          const response = JSON.parse(body);
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(response);
+          } else {
+            reject(new Error(`Upload failed: ${res.statusCode} - ${response.message || body}`));
+          }
+        } catch (error) {
+          reject(new Error(`Failed to parse upload response: ${body}`));
+        }
+      });
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    req.write(fileContent);
+    req.end();
+  });
+}
+
 // Create GitHub release
 async function createRelease() {
   try {
@@ -109,28 +160,22 @@ async function createRelease() {
     console.log('📤 Uploading release assets...');
     
     const files = [
-      'dist/Quicksnipe.exe',
-      'dist/Quicksnipe.exe.blockmap'
+      { path: 'dist/Quicksnipe.exe', name: 'Quicksnipe.exe' },
+      { path: 'dist/Quicksnipe.exe.blockmap', name: 'Quicksnipe.exe.blockmap' },
+      { path: 'dist/latest.yml', name: 'latest.yml' }
     ];
 
     for (const file of files) {
-      if (fs.existsSync(file)) {
-        console.log(`📁 Uploading ${file}...`);
-        const fileContent = fs.readFileSync(file);
-        const fileName = file.split('/').pop();
-        
-        const uploadUrl = release.upload_url.replace('{?name,label}', `?name=${fileName}`);
-        
+      if (fs.existsSync(file.path)) {
         try {
-          // Fix the upload URL path
-          const uploadPath = uploadUrl.replace('https://api.github.com/repos', '');
-          await makeGitHubRequest(uploadPath, 'POST', fileContent, true);
-          console.log(`✅ ${fileName} uploaded successfully`);
+          console.log(`📁 Uploading ${file.name}...`);
+          await uploadAsset(release.upload_url, file.path, file.name);
+          console.log(`✅ ${file.name} uploaded successfully`);
         } catch (error) {
-          console.error(`❌ Failed to upload ${fileName}:`, error.message);
+          console.error(`❌ Failed to upload ${file.name}:`, error.message);
         }
       } else {
-        console.warn(`⚠️  File not found: ${file}`);
+        console.warn(`⚠️  File not found: ${file.path}`);
       }
     }
     
@@ -141,55 +186,6 @@ async function createRelease() {
     console.error('❌ Failed to create release:', error.message);
     process.exit(1);
   }
-}
-
-// Update the makeGitHubRequest function to handle binary data
-function makeGitHubRequest(path, method = 'GET', data = null, isBinary = false) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.github.com',
-      path: `/repos/${OWNER}/${REPO}${path}`,
-      method: method,
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'User-Agent': 'QuickSnipe-Release-Script',
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    };
-
-    if (data && !isBinary) {
-      options.headers['Content-Type'] = 'application/json';
-    }
-
-    const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', (chunk) => {
-        body += chunk;
-      });
-      res.on('end', () => {
-        try {
-          const response = JSON.parse(body);
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(response);
-          } else {
-            reject(new Error(`GitHub API Error: ${res.statusCode} - ${response.message || body}`));
-          }
-        } catch (error) {
-          reject(new Error(`Failed to parse response: ${body}`));
-        }
-      });
-    });
-
-    req.on('error', (error) => {
-      reject(error);
-    });
-
-    if (data) {
-      req.write(isBinary ? data : JSON.stringify(data));
-    }
-
-    req.end();
-  });
 }
 
 createRelease(); 

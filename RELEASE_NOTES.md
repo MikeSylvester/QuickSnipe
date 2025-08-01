@@ -1,8 +1,29 @@
 # Release Notes
 
 
+## Version 1.0.12
+- Improved release notes formatting in auto-updater
+- Fixed HTML display issues in update modal
+- Enhanced readability of patch notes
+- Added proper styling for version headers and list items
+
+## Version 1.0.11
+- Fixed GitHub Actions workflow to use current electron-builder
+- Updated deprecated electron-userland action
+- Improved automated release process
+
+## Version 1.0.10
+- Added latest.yml file to releases for auto-updater
+- Fixed missing metadata file that caused update failures
+- Improved release asset completeness
+
+## Version 1.0.9
+- Fixed release process to upload assets properly
+- Improved GitHub API integration
+- Enhanced error handling for uploads
+
 ## Version 1.0.8
--Added script that auto updates Git
+- Added script that auto updates Git
 
 ## Version 1.0.7
 - Added auto-updater with startup check

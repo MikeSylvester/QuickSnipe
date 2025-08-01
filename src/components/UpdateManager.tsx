@@ -176,6 +176,51 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
     return formatBytes(bytesPerSecond) + '/s';
   };
 
+  const formatReleaseNotes = (notes: string) => {
+    // Remove HTML tags and decode entities
+    const cleanNotes = notes
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&lt;/g, '<') // Decode HTML entities
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
+
+    // Split into lines and format
+    const lines = cleanNotes.split('\n').filter(line => line.trim());
+    
+    return (
+      <div className="space-y-1">
+        {lines.map((line, index) => {
+          if (line.startsWith('##')) {
+            // Version header
+            return (
+              <div key={index} className="font-semibold text-blue-600 dark:text-blue-400">
+                {line.replace('##', '').trim()}
+              </div>
+            );
+          } else if (line.startsWith('-') || line.startsWith('•')) {
+            // List item
+            return (
+              <div key={index} className="flex items-start">
+                <span className="text-gray-500 dark:text-gray-400 mr-2">•</span>
+                <span className="flex-1">{line.replace(/^[-•]\s*/, '').trim()}</span>
+              </div>
+            );
+          } else {
+            // Regular text
+            return (
+              <div key={index} className="text-gray-700 dark:text-gray-300">
+                {line}
+              </div>
+            );
+          }
+        })}
+      </div>
+    );
+  };
+
   if (!isElectron) {
     return null; // Don't show update manager in web version
   }
@@ -271,7 +316,9 @@ export const UpdateManager: React.FC<UpdateManagerProps> = ({ darkMode }) => {
               {updateInfo.releaseNotes && (
                 <div className="text-sm text-gray-600 dark:text-gray-300">
                   <strong>Release Notes:</strong>
-                  <p className="mt-1">{updateInfo.releaseNotes}</p>
+                  <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg max-h-32 overflow-y-auto">
+                    {formatReleaseNotes(updateInfo.releaseNotes)}
+                  </div>
                 </div>
               )}
             </div>
