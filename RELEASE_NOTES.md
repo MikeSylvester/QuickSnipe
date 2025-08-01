@@ -1,6 +1,12 @@
 # Release Notes
 
 
+## Version 1.0.13
+- Fixed GitHub Actions workflow to remove deprecated electron-userland action
+- Updated workflow to use direct electron-builder commands
+- Improved automated release process reliability
+- Enhanced workflow step naming for better clarity
+
 ## Version 1.0.12
 - Improved release notes formatting in auto-updater
 - Fixed HTML display issues in update modal

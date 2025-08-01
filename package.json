@@ -3,7 +3,7 @@
   "productName": "Quicksnipe",
   "description": "A Snipe-IT QR Scanner",
   "private": true,
-  "version": "1.0.12",
+  "version": "1.0.13",
   "author": "Mike Sylvester",
   "main": "main.cjs",
   "scripts": {
