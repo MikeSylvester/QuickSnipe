@@ -1,6 +1,13 @@
 # Release Notes
 
 
+## Version 1.0.14
+- Fixed NSIS installer configuration for reliable updates
+- Changed from one-click to assisted installer mode
+- Added proper shortcut creation and elevation handling
+- Fixed appId consistency for update path compatibility
+- Improved installer reliability for existing installations
+
 ## Version 1.0.13
 - Fixed GitHub Actions workflow to remove deprecated electron-userland action
 - Updated workflow to use direct electron-builder commands
