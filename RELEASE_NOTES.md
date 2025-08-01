@@ -1,19 +1,19 @@
 # Release Notes
 
 
+## Version 1.0.2
+- Fixed NSIS installer to work properly with electron-builder's built-in update logic
+- Simplified installer script to avoid conflicts with automatic uninstallation
+- Removed manual registry and file cleanup that was causing installation failures
+- Let electron-builder handle all uninstallation and update processes automatically
+- Fixed installer to create shortcuts properly without interfering with update logic
+
 ## Version 1.0.16
 - Fixed NSIS installer to automatically uninstall previous versions
 - Added user confirmation dialog before uninstalling old version
 - Enhanced auto-updater to properly handle installation
 - Improved error handling for update installation process
 - Added proper cleanup of app data and registry entries
-
-## Version 1.0.15
-- Fixed GitHub Actions to only build for Windows (removed Linux builds)
-- Enhanced NSIS installer to properly uninstall previous versions
-- Added automatic cleanup of app data and registry entries
-- Improved installer reliability for updates
-- Fixed Linux icon requirements that were causing build failures
 
 ## Version 1.0.14
 - Fixed NSIS installer configuration for reliable updates

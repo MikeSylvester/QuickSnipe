@@ -1,6 +1,6 @@
-## Version 1.0.16
-- Fixed NSIS installer to automatically uninstall previous versions
-- Added user confirmation dialog before uninstalling old version
-- Enhanced auto-updater to properly handle installation
-- Improved error handling for update installation process
-- Added proper cleanup of app data and registry entries
+## Version 1.0.2
+- Fixed NSIS installer to work properly with electron-builder's built-in update logic
+- Simplified installer script to avoid conflicts with automatic uninstallation
+- Removed manual registry and file cleanup that was causing installation failures
+- Let electron-builder handle all uninstallation and update processes automatically
+- Fixed installer to create shortcuts properly without interfering with update logic
