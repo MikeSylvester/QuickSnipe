@@ -1,6 +1,6 @@
-## Version 1.0.2
-- Fixed NSIS installer to work properly with electron-builder's built-in update logic
-- Simplified installer script to avoid conflicts with automatic uninstallation
-- Removed manual registry and file cleanup that was causing installation failures
-- Let electron-builder handle all uninstallation and update processes automatically
-- Fixed installer to create shortcuts properly without interfering with update logic
+## Version 1.0.30
+- Simplified installer filename to just "Quicksnipe.exe" for cleaner naming
+- Fixed NSIS build errors and file mapping issues
+- Improved auto-updater compatibility with consistent file naming
+- Fixed installer uninstallation and update processes
+- Streamlined release asset naming for better compatibility

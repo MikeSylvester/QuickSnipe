@@ -1,6 +1,18 @@
 # Release Notes
 
 
+## Version 1.0.33
+- Updated application branding to "Cayuga Centers Inventory Management"
+- Changed submenu text from "Tablet-First Inventory Management" to "Cayuga Centers Inventory Management"
+- Improved application identity and branding consistency
+
+## Version 1.0.32
+- Fixed installer file naming to use URL-safe names without spaces
+- Updated artifact naming to use hyphens instead of spaces
+- Fixed GitHub upload issues with special characters in file names
+- Improved auto-updater compatibility with proper file naming
+- Enhanced installer reliability with simplified file structure
+
 ## Version 1.0.2
 - Fixed NSIS installer to work properly with electron-builder's built-in update logic
 - Simplified installer script to avoid conflicts with automatic uninstallation

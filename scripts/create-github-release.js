@@ -160,8 +160,8 @@ async function createRelease() {
     console.log('📤 Uploading release assets...');
     
     const files = [
-      { path: `dist/Quicksnipe Setup ${VERSION}.exe`, name: `Quicksnipe Setup ${VERSION}.exe` },
-      { path: `dist/Quicksnipe Setup ${VERSION}.exe.blockmap`, name: `Quicksnipe Setup ${VERSION}.exe.blockmap` },
+      { path: `dist/Quicksnipe-Setup-${VERSION}.exe`, name: `Quicksnipe-Setup-${VERSION}.exe` },
+      { path: `dist/Quicksnipe-Setup-${VERSION}.exe.blockmap`, name: `Quicksnipe-Setup-${VERSION}.exe.blockmap` },
       { path: 'dist/latest.yml', name: 'latest.yml' }
     ];
 
