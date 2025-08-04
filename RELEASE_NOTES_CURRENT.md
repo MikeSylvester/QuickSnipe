@@ -1,4 +1,6 @@
-## Version 1.0.34
-- Updated main page icon from Smartphone to Package for better inventory representation
-- Changed title icon to be more appropriate for inventory management
-- Improved visual branding to better reflect the application's purpose
+## Version 1.0.35
+- Fixed search functionality in data analysis view
+- Search now only filters available filter options instead of affecting chart data
+- Updated search bar placeholder text to be more descriptive
+- Added helpful text explaining search functionality
+- Improved user experience by making search purpose clearer

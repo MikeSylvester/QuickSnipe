@@ -4,7 +4,7 @@
   "icon": "assets/icons/icon.ico",
   "description": "A Snipe-IT QR Scanner",
   "private": true,
-  "version": "1.0.34",
+  "version": "1.0.35",
   "author": "Mike Sylvester",
   "main": "main.cjs",
   "scripts": {

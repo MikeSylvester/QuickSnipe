@@ -113,19 +113,6 @@ export const Reports: React.FC<ReportsProps> = ({ onBack, config, showToast }) =
       filtered = filtered.filter(e => e.model?.id && filters.modelIds.includes(e.model.id));
     }
 
-    // Apply search filter
-    if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(e => 
-        e.name?.toLowerCase().includes(searchLower) ||
-        e.asset_tag?.toLowerCase().includes(searchLower) ||
-        e.model?.name?.toLowerCase().includes(searchLower) ||
-        e.location?.name?.toLowerCase().includes(searchLower) ||
-        e.status_label?.name?.toLowerCase().includes(searchLower) ||
-        e.assigned_to?.name?.toLowerCase().includes(searchLower)
-      );
-    }
-
     return filtered;
   };
 
@@ -738,7 +725,7 @@ export const Reports: React.FC<ReportsProps> = ({ onBack, config, showToast }) =
         <div className="relative">
           <input
             type="text"
-            placeholder="Search assets, locations, models..."
+            placeholder="Search filter options..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 pl-10 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -746,6 +733,9 @@ export const Reports: React.FC<ReportsProps> = ({ onBack, config, showToast }) =
           <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
+        </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Search to find locations, statuses, and models in the filter lists below
         </div>
       </div>
 
@@ -959,7 +949,7 @@ export const Reports: React.FC<ReportsProps> = ({ onBack, config, showToast }) =
            <div className="text-sm text-gray-600 dark:text-gray-400">
              <span className="font-semibold text-gray-900 dark:text-white">{filterEquipment().length}</span> assets found
            </div>
-           {(filters.locationIds.length > 0 || filters.statusIds.length > 0 || filters.modelIds.length > 0 || searchTerm.trim()) && (
+           {(filters.locationIds.length > 0 || filters.statusIds.length > 0 || filters.modelIds.length > 0) && (
              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                Filtered from {equipment.length} total assets
              </div>
